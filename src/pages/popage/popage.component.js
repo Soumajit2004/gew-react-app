@@ -1,8 +1,7 @@
 import React from "react";
 import HeaderComponent from "../../components/header/header.component";
 import {Button, Container, Grow, IconButton, Snackbar, Stack, TextField, Typography} from "@mui/material";
-import {doc, getDoc} from "firebase/firestore";
-import {db} from "../../firebase/firebase.utils";
+import {customGetPoDoc} from "../../firebase/firebase.utils";
 import "./popage.styles.scss"
 import PoViewBody from "../../components/pobody/pobody.component";
 import {Add, Close, Search} from "@mui/icons-material";
@@ -37,9 +36,7 @@ class PoPage extends React.Component {
 
         if (searchText) {
 
-            const poRef = doc(db, "po", searchText.toString());
-
-            getDoc(poRef)
+            customGetPoDoc(searchText.toString())
                 .then((e) => {
                     const data = e.data()
                     if (data) {

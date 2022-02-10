@@ -6,7 +6,8 @@ const INITIAL_STATE = {
     searchText:"",
     viewMode:false,
     editMode:false,
-    addMode:false
+    addMode:false,
+    recentPo:[]
 }
 
 const poReducer = (state = INITIAL_STATE, action) => {
@@ -35,6 +36,11 @@ const poReducer = (state = INITIAL_STATE, action) => {
             return {
                 ...state,
                 addMode: !state.addMode,
+            }
+        case PoActionTypes.SET_RECENT_PO:
+            return {
+                ...state,
+                recentPo: action.payload,
             }
         default:
             return state

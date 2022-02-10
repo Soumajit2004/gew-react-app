@@ -12,6 +12,13 @@ export const setPoData = ({poDate, issueDate, lastEditedTime, ...otherData}) => 
     }
 }
 
+export const setRecentPo = (docsList) => {
+    return {
+        type: PoActionTypes.SET_RECENT_PO,
+        payload: docsList
+    }
+}
+
 export const setSearchText = text => {
     return {
         type: PoActionTypes.SET_SEARCH_TEXT,

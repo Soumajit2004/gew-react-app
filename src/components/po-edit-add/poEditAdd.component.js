@@ -3,8 +3,8 @@ import {Button, Divider, Grow, IconButton, Paper, Snackbar, Stack, TextField, Ty
 import "./poEditAdd.styles.scss"
 import {Add, CancelOutlined, Close, Delete, Save} from "@mui/icons-material";
 import Box from "@mui/material/Box";
-import {doc, getDoc, setDoc, Timestamp, updateDoc} from "firebase/firestore";
-import {db} from "../../firebase/firebase.utils";
+import {doc, setDoc, Timestamp, updateDoc} from "firebase/firestore";
+import {customGetPoDoc, db} from "../../firebase/firebase.utils";
 import {connect} from "react-redux";
 import {parseDate} from "../../utilils/functions.utilis";
 import {selectCurrentUser} from "../../redux/user/user.selector";
@@ -68,9 +68,7 @@ class PoEditAdd extends React.Component {
     refreshPoDetails = (poNumber, callback) => {
         const {setPoData} = this.props
 
-        const poRef = doc(db, "po", poNumber);
-
-        getDoc(poRef)
+        customGetPoDoc(poNumber)
             .then((e) => {
                 const data = e.data()
                 if (data) {

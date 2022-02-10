@@ -1,0 +1,8 @@
+.r-po-card{
+  transition: transform 0.8s ease;
+  cursor: pointer;
+
+  &:hover{
+    transform: scale(1.1);
+  }
+}
