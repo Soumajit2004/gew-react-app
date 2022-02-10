@@ -28,8 +28,9 @@ import {DataGrid} from "@mui/x-data-grid";
 import {parseDate} from "../../utilils/functions.utilis";
 import {connect} from "react-redux";
 import {setSearchText, toggleAddMode, toggleEditMode, toggleViewMode} from "../../redux/po/po.actions.";
-import {db} from "../../firebase/firebase.utils";
+import {db, doxPoFirebaseFnc} from "../../firebase/firebase.utils";
 import {selectPoData, selectPoSearch} from "../../redux/po/po.selectors.";
+import {selectCurrentUser} from "../../redux/user/user.selector";
 
 const columns = [
     {field: 'id', headerName: 'ID', width: 50},
@@ -54,7 +55,8 @@ const PoViewBody = ({
                         handleSearch,
                         toggleEditMode,
                         toggleAddMode,
-                        toggleViewMode
+                        toggleViewMode,
+                        user
                     }) => {
     const rows = []
     let counter = 0
@@ -179,7 +181,18 @@ const PoViewBody = ({
                                                             .then(r => {
                                                                 toggleViewMode()
                                                             })
+
                                                     }}>Delete</MenuItem>
+
+                                            <MenuItem onClick={() => {
+                                                doxPoFirebaseFnc({id: poNumber})
+                                                    .then(r => {
+                                                    console.log([r.data])
+                                                }).catch(e=>{console.log(e)})
+                                            }}>
+                                                Download
+                                            </MenuItem>
+
                                             <MenuItem
                                                 onClick={() => {
                                                     handleClickOpen()
@@ -262,13 +275,15 @@ const PoViewBody = ({
         </Stack>
 
 
-    );
+    )
+        ;
 
 }
 
 const mapStateToProps = (state) => ({
     poData: selectPoData(state),
     searchText: selectPoSearch(state),
+    user: selectCurrentUser(state)
 })
 
 const mapDispatchToProp = dispatch => ({

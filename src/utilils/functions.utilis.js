@@ -1,5 +1,3 @@
-import {auth} from "../firebase/firebase.utils";
-
 export const parseDate = ({date, reverse}) => {
     const ddDate = (int) => {
         if (int < 10){
@@ -14,8 +12,4 @@ export const parseDate = ({date, reverse}) => {
     }else{
         return `${ddDate(parseInt(date.getDate()))}-${ddDate(parseInt(date.getMonth())+1)}-${date.getFullYear()}`
     }
-}
-
-export const protectedRoute = () => {
-    return !!auth.currentUser;
 }

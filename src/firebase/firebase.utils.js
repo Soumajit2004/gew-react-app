@@ -2,6 +2,7 @@ import {initializeApp} from "firebase/app";
 import {getAnalytics} from "firebase/analytics";
 import {getAuth, browserSessionPersistence} from "firebase/auth";
 import {getFirestore, getDocFromCache, doc, getDoc} from "firebase/firestore";
+import { getFunctions, httpsCallable } from 'firebase/functions';
 
 const firebaseConfig = {
     apiKey: "AIzaSyB-8K5SLVIWTiOQiJF1Sb4jLU4xDtKJ92c",
@@ -17,11 +18,15 @@ const app = initializeApp(firebaseConfig);
 // eslint-disable-next-line no-unused-vars
 const analytics = getAnalytics(app);
 
-export const auth = getAuth()
+export const auth = getAuth(app)
 
 auth.setPersistence(browserSessionPersistence).then(r => {})
 
-export const db = getFirestore()
+export const db = getFirestore(app)
+
+const functions = getFunctions(app, "asia-south1")
+
+export const doxPoFirebaseFnc = httpsCallable(functions, 'docxPo')
 
 export const customGetPoDoc = async (poId) => {
     const docRef = doc(db, "po", poId.toString());
