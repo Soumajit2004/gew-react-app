@@ -13,3 +13,12 @@ export const parseDate = ({date, reverse}) => {
         return `${ddDate(parseInt(date.getDate()))}-${ddDate(parseInt(date.getMonth())+1)}-${date.getFullYear()}`
     }
 }
+
+export const downloadFromUrl = (url) => {
+    const link = document.createElement("a");
+    link.setAttribute("download", "true")
+    link.setAttribute("href", url.toString())
+    document.getElementById("root").appendChild(link)
+    link.click()
+    document.getElementById("root").removeChild(link)
+}

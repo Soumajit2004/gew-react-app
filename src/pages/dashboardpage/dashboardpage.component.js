@@ -25,7 +25,7 @@ class DashboardPage extends React.Component {
 
     // eslint-disable-next-line react/require-render-return
     render() {
-        const {currentUser: {displayName}} = this.props
+        const {currentUser: {name}} = this.props
 
         return (
             <HeaderComponent title="Dashboard">
@@ -35,7 +35,7 @@ class DashboardPage extends React.Component {
                                     component="h3"
                                     fontSize={35}
                                     fontWeight={500}>
-                            Welcome, {displayName} !
+                            Welcome, {name} !
                         </Typography>
                         <Divider/>
                         <RecentPo/>

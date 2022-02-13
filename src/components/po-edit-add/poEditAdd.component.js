@@ -1,5 +1,5 @@
 import * as React from "react";
-import {Button, Divider, Grow, IconButton, Paper, Snackbar, Stack, TextField, Typography} from "@mui/material";
+import {Button, Divider, Grid, Grow, IconButton, Paper, Snackbar, Stack, TextField, Typography} from "@mui/material";
 import "./poEditAdd.styles.scss"
 import {Add, CancelOutlined, Close, Delete, Save} from "@mui/icons-material";
 import Box from "@mui/material/Box";
@@ -81,7 +81,7 @@ class PoEditAdd extends React.Component {
 
     handleSave = () => {
         const {poNumber, issueNumber, poDate, issueDate, description, rows} = this.state
-        const {editMode, viewMode, addMode, currentUser:{displayName}, toggleEditMode, toggleAddMode} = this.props
+        const {editMode, viewMode, addMode, currentUser:{name}, toggleEditMode, toggleAddMode} = this.props
 
         if (this.validateFields()) {
 
@@ -92,7 +92,6 @@ class PoEditAdd extends React.Component {
 
 
             let docRef = doc(db, "po", poNumber)
-            console.log([poNumber, issueNumber, issueDate, poDate, description, materials, displayName])
             if (addMode) {
                 setDoc(docRef, {
                     issueNo: issueNumber,
@@ -100,7 +99,7 @@ class PoEditAdd extends React.Component {
                     poDate: Timestamp.fromDate(poDate),
                     description: description,
                     material: materials,
-                    lastEditedBy: displayName,
+                    lastEditedBy: name,
                     lastEditedTime: Timestamp.fromDate(new Date())
                 }).then(r => {
                     if (viewMode){
@@ -118,7 +117,7 @@ class PoEditAdd extends React.Component {
                     poDate: Timestamp.fromDate(poDate),
                     description: description,
                     material: materials,
-                    lastEditedBy: displayName,
+                    lastEditedBy: name,
                     lastEditedTime: Timestamp.fromDate(new Date())
                 })
                     .then(r => {
@@ -139,7 +138,7 @@ class PoEditAdd extends React.Component {
 
         return (
             <Grow in>
-                <Paper elevation={6} style={{height: "830px"}}>
+                <Paper elevation={6} style={{overflowY: "scroll"}}>
                     <Stack>
                         <Snackbar open={this.state.snackbarOpen}
                                   action={this.snackbarAction}
@@ -150,128 +149,136 @@ class PoEditAdd extends React.Component {
                                       this.setState({snackbarOpen: false})
                                   }}
                         />
-                        <Stack direction="row"
-                               style={{height: "60px", padding: "20px", justifyContent: "space-between"}}>
-                            <div style={{display: "flex", alignItems: "center"}}>
-                                <Typography variant="h5" fontWeight={600}
-                                            component="h5">{(editMode ? ("Edit P.O") : ("Add P.O"))}</Typography>
-                            </div>
-                            <div style={{display: "flex", alignItems: "center", gap: "10px"}}>
-                                <Button variant="contained" startIcon={<Save/>} style={{height: 40}}
-                                        onClick={this.handleSave}>
-                                    Save
-                                </Button>
-                                <Button variant="outlined" startIcon={<CancelOutlined/>} style={{height: 40}}
-                                        onClick={editMode ? toggleEditMode : toggleAddMode}>
-                                    Cancel
-                                </Button>
-                            </div>
-                        </Stack>
+                        <Grid container spacing={1} padding={2}>
+                            <Grid item sm={12} md={6}>
+                                <div style={{display: "flex", alignItems: "flex-end"}}>
+                                    <Typography variant="h4" fontWeight={600}
+                                                component="h4">{(editMode ? ("Edit P.O") : ("Add P.O"))}</Typography>
+                                </div>
+                            </Grid>
+                            <Grid item sm={12} md={6}>
+                                <div style={{display: "flex", alignItems: "center", justifyContent:"flex-end", gap: "10px"}}>
+                                    <Button variant="contained" startIcon={<Save/>} style={{height: 40}}
+                                            onClick={this.handleSave}>
+                                        Save
+                                    </Button>
+                                    <Button variant="outlined" startIcon={<CancelOutlined/>} style={{height: 40}}
+                                            onClick={editMode ? toggleEditMode : toggleAddMode}>
+                                        Cancel
+                                    </Button>
+                                </div>
+                            </Grid>
+                        </Grid>
                         <Divider/>
-                        <Stack direction="row" spacing={2} style={{padding: "20px", height: "100%"}}>
-                            <Stack spacing={2} style={{flex: 1}}>
-                                <TextField id="filled-basic" label="P.O Number" variant="outlined"
-                                           value={poNumber}
-                                           disabled={editMode}
-                                           onChange={(e) => {
-                                               this.setState({poNumber: e.target.value})
-                                           }}
-                                />
-                                <TextField id="filled-basic" label="Memo Number" variant="outlined"
-                                           value={issueNumber}
-                                           onChange={(e) => {
-                                               this.setState({issueNumber: e.target.value})
-                                           }}
-                                />
-                                <div className="date-div">
-                                    <label htmlFor="poDate">P.O Date</label>
-                                    <input id="poDate" value={parseDate({date: poDate, reverse: true})}
-                                           type="date" className="date-picker"
-                                           onChange={(e) => {
-                                               this.setState({poDate: new Date(e.target.value)})
-                                           }}/>
-                                </div>
-                                <div className="date-div">
-                                    <label htmlFor="memoDate">Memo Date</label>
-                                    <input id="memoDate" value={parseDate({date: issueDate, reverse: true})}
-                                           type="date"
-                                           className="date-picker"
-                                           onChange={(e) => {
-                                               this.setState({issueDate: new Date(e.target.value)})
-                                           }}
-                                    />
-                                </div>
-                                <TextField id="standard-textarea"
-                                           label="Description"
-                                           placeholder="Enter Description Here"
-                                           multiline
-                                           rows={18}
-                                           style={{height: "50%"}}
-                                           variant="outlined"
-                                           value={description}
-                                           onChange={(e) => {
-                                               this.setState({description: e.target.value})
-                                           }}
-                                />
-                            </Stack>
-                            <Stack spacing={1} style={{flex: 1}}>
-                                <Box style={{display: "flex", flexDirection: "row", justifyContent: "space-between"}}>
-                                    <div style={{display: "flex", alignItems: "center"}}>
-                                        <Typography variant="h5">Materials</Typography>
-                                    </div>
-                                    <IconButton onClick={() => {
-                                        let newRows = rows
-                                        newRows.push({matName: "", quantity: "", unit: ""})
-                                        this.setState({rows: newRows})
-                                    }}>
-                                        <Add/>
-                                    </IconButton>
-                                </Box>
-                                <div className="materials-table">
-                                    {rows.map((e) => {
-                                            let newValue = e
+                        <Grid container spacing={2} padding={1}>
+                            <Grid item sm={12} md={6} style={{width:"100%"}}>
+                                    <Stack spacing={2} >
+                                        <TextField id="filled-basic" label="P.O Number" variant="outlined"
+                                                   value={poNumber}
+                                                   disabled={editMode}
+                                                   onChange={(e) => {
+                                                       this.setState({poNumber: e.target.value})
+                                                   }}
+                                                   fullWidth
+                                        />
+                                        <TextField id="filled-basic" label="Memo Number" variant="outlined"
+                                                   value={issueNumber}
+                                                   onChange={(e) => {
+                                                       this.setState({issueNumber: e.target.value})
+                                                   }}
+                                        />
+                                        <div className="date-div">
+                                            <label htmlFor="poDate">P.O Date</label>
+                                            <input id="poDate" value={parseDate({date: poDate, reverse: true})}
+                                                   type="date" className="date-picker"
+                                                   onChange={(e) => {
+                                                       this.setState({poDate: new Date(e.target.value)})
+                                                   }}/>
+                                        </div>
+                                        <div className="date-div">
+                                            <label htmlFor="memoDate">Memo Date</label>
+                                            <input id="memoDate" value={parseDate({date: issueDate, reverse: true})}
+                                                   type="date"
+                                                   className="date-picker"
+                                                   onChange={(e) => {
+                                                       this.setState({issueDate: new Date(e.target.value)})
+                                                   }}
+                                            />
+                                        </div>
+                                        <TextField id="standard-textarea"
+                                                   label="Description"
+                                                   placeholder="Enter Description Here"
+                                                   multiline
+                                                   rows={18}
+                                                   style={{height: "50%"}}
+                                                   variant="outlined"
+                                                   value={description}
+                                                   onChange={(e) => {
+                                                       this.setState({description: e.target.value})
+                                                   }}
+                                        />
+                                    </Stack>
+                            </Grid>
+                            <Grid item sm={12} md={6}>
+                                <Stack spacing={2}>
+                                    <Box style={{display: "flex", flexDirection: "row", justifyContent: "space-between"}}>
+                                        <div style={{display: "flex", alignItems: "center"}}>
+                                            <Typography variant="h5">Materials</Typography>
+                                        </div>
+                                        <IconButton onClick={() => {
                                             let newRows = rows
-                                            let index = newRows.indexOf(e)
+                                            newRows.push({matName: "", quantity: "", unit: ""})
+                                            this.setState({rows: newRows})
+                                        }}>
+                                            <Add/>
+                                        </IconButton>
+                                    </Box>
+                                    <div className="materials-table">
+                                        {rows.map((e) => {
+                                                let newValue = e
+                                                let newRows = rows
+                                                let index = newRows.indexOf(e)
 
-                                            return <div key={index}>
-                                                <TextField style={{flex: 4}} fullWidth id="outlined-basic"
-                                                           label="Material Name"
-                                                           variant="outlined" size="small" value={e.matName}
-                                                           onChange={(element) => {
-                                                               newValue.matName = element.target.value
-                                                               newRows[index] = newValue
-                                                               this.setState({rows: newRows})
-                                                           }}/>
-                                                <TextField style={{flex: 2}} id="outlined-basic" label="Quantity"
-                                                           variant="outlined" size="small" value={e.quantity}
-                                                           onChange={(element) => {
-                                                               newValue.quantity = element.target.value
-                                                               newRows[index] = newValue
-                                                               this.setState({rows: newRows})
-                                                           }
-                                                           }/>
-                                                <TextField style={{flex: 1}} id="outlined-basic" label="Unit"
-                                                           variant="outlined"
-                                                           size="small" value={e.unit}
-                                                           onChange={(element) => {
-                                                               newValue.unit = element.target.value
-                                                               newRows[index] = newValue
-                                                               this.setState({rows: newRows})
-                                                           }
-                                                           }/>
-                                                <IconButton
-                                                    onClick={() => {
-                                                        newRows.splice(index, 1)
-                                                        this.setState({rows: newRows})
-                                                    }}>
-                                                    <Delete/>
-                                                </IconButton>
-                                            </div>
-                                        }
-                                    )}
-                                </div>
-                            </Stack>
-                        </Stack>
+                                                return <div key={index}>
+                                                    <TextField style={{flex: 4}} fullWidth id="outlined-basic"
+                                                               label="Material Name"
+                                                               variant="outlined" size="small" value={e.matName}
+                                                               onChange={(element) => {
+                                                                   newValue.matName = element.target.value
+                                                                   newRows[index] = newValue
+                                                                   this.setState({rows: newRows})
+                                                               }}/>
+                                                    <TextField style={{flex: 2}} id="outlined-basic" label="Quantity"
+                                                               variant="outlined" size="small" value={e.quantity}
+                                                               onChange={(element) => {
+                                                                   newValue.quantity = element.target.value
+                                                                   newRows[index] = newValue
+                                                                   this.setState({rows: newRows})
+                                                               }
+                                                               }/>
+                                                    <TextField style={{flex: 1}} id="outlined-basic" label="Unit"
+                                                               variant="outlined"
+                                                               size="small" value={e.unit}
+                                                               onChange={(element) => {
+                                                                   newValue.unit = element.target.value
+                                                                   newRows[index] = newValue
+                                                                   this.setState({rows: newRows})
+                                                               }
+                                                               }/>
+                                                    <IconButton
+                                                        onClick={() => {
+                                                            newRows.splice(index, 1)
+                                                            this.setState({rows: newRows})
+                                                        }}>
+                                                        <Delete/>
+                                                    </IconButton>
+                                                </div>
+                                            }
+                                        )}
+                                    </div>
+                                </Stack>
+                            </Grid>
+                        </Grid>
                     </Stack>
                 </Paper>
             </Grow>

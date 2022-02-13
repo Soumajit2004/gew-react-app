@@ -69,9 +69,8 @@ class PoPage extends React.Component {
         } else {
             return (
                 <Grow in>
-                    <div style={{height: "70%", width: "100%", display: "flex", alignItems: "center"}}>
-                        <Stack spacing={2} style={{width: "100%"}}>
-                            <Typography variant="h1" align="center" paddingBottom="30px" fontWeight={600}>
+                        <Stack spacing={4} style={{width: "100%", height:"70%", justifyContent:"center"}}>
+                            <Typography variant="h2" fontSize={60} align="center" fontWeight={500}>
                                 Search P.O
                             </Typography>
                             <TextField
@@ -95,7 +94,6 @@ class PoPage extends React.Component {
                                 </Button>
                             </Stack>
                         </Stack>
-                    </div>
                 </Grow>
             )
         }

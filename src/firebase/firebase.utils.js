@@ -2,7 +2,8 @@ import {initializeApp} from "firebase/app";
 import {getAnalytics} from "firebase/analytics";
 import {getAuth, browserSessionPersistence} from "firebase/auth";
 import {getFirestore, getDocFromCache, doc, getDoc} from "firebase/firestore";
-import { getFunctions, httpsCallable } from 'firebase/functions';
+import { getFunctions, httpsCallable, connectFunctionsEmulator } from 'firebase/functions';
+import { getStorage } from 'firebase/storage';
 
 const firebaseConfig = {
     apiKey: "AIzaSyB-8K5SLVIWTiOQiJF1Sb4jLU4xDtKJ92c",
@@ -24,7 +25,10 @@ auth.setPersistence(browserSessionPersistence).then(r => {})
 
 export const db = getFirestore(app)
 
+export const storage = getStorage(app);
+
 const functions = getFunctions(app, "asia-south1")
+
 
 export const doxPoFirebaseFnc = httpsCallable(functions, 'docxPo')
 

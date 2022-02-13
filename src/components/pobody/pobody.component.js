@@ -17,6 +17,7 @@ import {
 import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
 import {doc, deleteDoc} from "firebase/firestore";
+import {ref, getDownloadURL} from "firebase/storage";
 import {
     Add,
     Edit,
@@ -25,12 +26,11 @@ import {
 } from "@mui/icons-material";
 
 import {DataGrid} from "@mui/x-data-grid";
-import {parseDate} from "../../utilils/functions.utilis";
+import {downloadFromUrl, parseDate} from "../../utilils/functions.utilis";
 import {connect} from "react-redux";
 import {setSearchText, toggleAddMode, toggleEditMode, toggleViewMode} from "../../redux/po/po.actions.";
-import {db, doxPoFirebaseFnc} from "../../firebase/firebase.utils";
+import {db, doxPoFirebaseFnc, storage} from "../../firebase/firebase.utils";
 import {selectPoData, selectPoSearch} from "../../redux/po/po.selectors.";
-import {selectCurrentUser} from "../../redux/user/user.selector";
 
 const columns = [
     {field: 'id', headerName: 'ID', width: 50},
@@ -56,7 +56,6 @@ const PoViewBody = ({
                         toggleEditMode,
                         toggleAddMode,
                         toggleViewMode,
-                        user
                     }) => {
     const rows = []
     let counter = 0
@@ -184,11 +183,23 @@ const PoViewBody = ({
 
                                                     }}>Delete</MenuItem>
 
-                                            <MenuItem onClick={() => {
-                                                doxPoFirebaseFnc({id: poNumber})
-                                                    .then(r => {
-                                                    console.log([r.data])
-                                                }).catch(e=>{console.log(e)})
+                                            <MenuItem onClick={async () => {
+                                                const poDocRef = ref(storage, `po-downloads/${poNumber}.docx`)
+                                                let url = null
+
+                                                try {
+                                                    url = await getDownloadURL(poDocRef)
+                                                    downloadFromUrl(url)
+                                                }catch (e) {
+                                                    doxPoFirebaseFnc({id: poNumber})
+                                                        .then(async r => {
+                                                            setTimeout(async () => {
+                                                                url = await getDownloadURL(poDocRef)
+                                                                downloadFromUrl(url)
+                                                            }, 5000)
+                                                        })
+                                                }
+                                                handleMenuClose()
                                             }}>
                                                 Download
                                             </MenuItem>
@@ -283,7 +294,6 @@ const PoViewBody = ({
 const mapStateToProps = (state) => ({
     poData: selectPoData(state),
     searchText: selectPoSearch(state),
-    user: selectCurrentUser(state)
 })
 
 const mapDispatchToProp = dispatch => ({

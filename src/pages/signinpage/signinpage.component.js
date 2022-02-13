@@ -35,7 +35,7 @@ class SignInPage extends React.Component {
 
         signInWithEmailAndPassword(this.auth, this.state.email, this.state.password)
             .then((userCredential) => {
-                this.history.push("/office/dashboard")
+                this.history.push("/dashboard")
             })
             .catch((error) => {
                 this.showError(error.toString())

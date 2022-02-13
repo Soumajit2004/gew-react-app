@@ -122,13 +122,13 @@ function HeaderComponent({title, children, history}) {
                 </DrawerHeader>
                 <Divider/>
                 <List>
-                    <ListItem button key={1} onClick={() => redirectTo("/office/dashboard")}>
+                    <ListItem button key={1} onClick={() => redirectTo("/dashboard")}>
                         <ListItemIcon>
                             <Dashboard/>
                         </ListItemIcon>
                         <ListItemText primary="Dashboard"/>
                     </ListItem>
-                    <ListItem button key={2} onClick={() => redirectTo("/office/po-manager")}>
+                    <ListItem button key={2} onClick={() => redirectTo("/po-manager")}>
                         <ListItemIcon>
                             <Pages/>
                         </ListItemIcon>
@@ -143,7 +143,7 @@ function HeaderComponent({title, children, history}) {
                 </List>
                 <Divider/>
                 <List>
-                    <ListItem button key={4} href="/">
+                    <ListItem button key={4}onClick={() => redirectTo("/register")}>
                         <ListItemIcon>
                             <AppRegistration/>
                         </ListItemIcon>
@@ -151,7 +151,7 @@ function HeaderComponent({title, children, history}) {
                     </ListItem>
                     <ListItem button key={5} onClick={() => {
                         auth.signOut()
-                            .then(() => redirectTo("/"))
+                            .then(() => redirectTo("/sign-in"))
                     }}>
                         <ListItemIcon>
                             <Logout/>

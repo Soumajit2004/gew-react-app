@@ -1,6 +1,7 @@
 import React from "react";
 import "./homepage.styles.scss";
-import {Button, Container, Grid, Stack, Typography} from "@mui/material";
+import {Button, Container,Stack, Typography} from "@mui/material";
+import Box from "@mui/material/Box";
 
 const HomePage = () => (
     <div className="home-page">
@@ -20,14 +21,9 @@ const HomePage = () => (
                     <Typography variant="h1" component="h1" fontSize={80} fontWeight={600} color="white">
                         Ghosh Electrical Works
                     </Typography>
-                    <Grid container spacing={2}>
-                        <Grid item>
-                            <Button variant="contained" href="/sign-in">Admin Portal</Button>
-                        </Grid>
-                        <Grid item>
-                            <Button variant="contained" color="secondary" href="/contact">Contact</Button>
-                        </Grid>
-                    </Grid>
+                    <Box>
+                        <Button variant="contained" href="/sign-in">Dashboard</Button>
+                    </Box>
                 </Stack>
             }/>
     </div>

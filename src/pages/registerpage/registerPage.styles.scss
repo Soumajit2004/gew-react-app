@@ -1,0 +1,12 @@
+.register-layout {
+  height: 85vh;
+  display: flex !important;
+  flex-direction: column;
+  justify-content: space-evenly;
+  gap: 20px;
+
+  h2{
+    text-align: center;
+    font-weight: 500;
+  }
+}

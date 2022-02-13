@@ -12,7 +12,6 @@ const {
     TextRun, VerticalAlign,
     WidthType
 } = require("docx");
-
 const serviceAccount = require('./ghosh-ele-works-firebase-adminsdk-heq28-c38f7ea580.json');
 
 const app = admin.initializeApp({
@@ -26,11 +25,22 @@ const db = admin.firestore(app)
 exports.docxPo = functions
     .region("asia-south1")
     .runWith({
-        timeoutSeconds: 300,
-        memory: "256MB"
+        timeoutSeconds: 180,
+        memory: "1GB"
     })
     .https.onCall(async (data, context) => {
         const poRef = db.collection('po').doc(data.id);
+
+        const parseMyDate = (date) => {
+            const ddDate = (int) => {
+                if (int < 10) {
+                    return `0${int.toString()}`
+                } else {
+                    return int
+                }
+            }
+            return `${ddDate(parseInt(date.getDate()))}-${ddDate(parseInt(date.getMonth()) + 1)}-${date.getFullYear()}`
+        }
 
         try {
             const doc = await poRef.get();
@@ -87,7 +97,7 @@ exports.docxPo = functions
                     )
                 }
 
-                const file =  await new Document({
+                const file = await new Document({
                     sections: [{
                         properties: {},
                         children: [
@@ -106,7 +116,7 @@ exports.docxPo = functions
                                 children: [
                                     new TextRun("PO Date: "),
                                     new TextRun({
-                                        text: poDate.toString(),
+                                        text: parseMyDate(poDate.toDate()),
                                         bold: true,
                                     }),
                                 ],
@@ -126,7 +136,7 @@ exports.docxPo = functions
                                 children: [
                                     new TextRun("Memo Date: "),
                                     new TextRun({
-                                        text: issueDate.toString(),
+                                        text: parseMyDate(issueDate.toDate()),
                                         bold: true,
                                     }),
                                 ],
@@ -154,25 +164,28 @@ exports.docxPo = functions
                     }],
                 })
 
-                Packer.toBuffer(file).then(async (buffer) => {
-                    bucket.file(`po-downloads/${data.id}.docx`).save(buffer)
-                        .then(() => {
-                            return {
-                                status: "success"
-                            }
-                        })
-                        .catch((e) => {
-                            return {
-                                status:e.toString()
-                            }
-                        })
-                })
+                const buffer = await Packer.toBuffer(file)
 
-
+                await bucket.file(`po-downloads/${data.id}.docx`).save(buffer)
+                return {
+                    status: "success"
+                }
             }
         } catch (e) {
             return {
                 status: e.toString()
             }
         }
+    })
+
+exports.deletePoDownloads = functions
+    .runWith({
+        timeoutSeconds: 120,
+        memory: "128MB"
+    })
+    .region("asia-south1")
+    .pubsub.schedule("00 12 * * 7")
+    .timeZone("Asia/Kolkata")
+    .onRun(async () => {
+        await bucket.deleteFiles({prefix: "po-downloads/"})
     })

@@ -15,7 +15,7 @@ const RecentPo = ({recentPo: {docs}, setPoData, toggleViewMode, history, setSear
         setPoData({poNumber: element.id, ...element.data()})
         !viewMode ? toggleViewMode() : console.log("HI")
 
-        history.push("/office/po-manager")
+        history.push("/po-manager")
     }
 
     const getItems = () => {
