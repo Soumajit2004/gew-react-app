@@ -4,7 +4,7 @@ import {
     Button,
     Container,
     FormControl, Grid,
-    Grow, IconButton,
+    Grow, IconButton, InputAdornment,
     InputLabel,
     MenuItem,
     Paper, Select, Snackbar, Stack,
@@ -20,7 +20,7 @@ import isMobilePhone from "validator/es/lib/isMobilePhone";
 import isNumeric from "validator/es/lib/isNumeric";
 import {doc, setDoc} from "firebase/firestore";
 import {deleteUser} from "firebase/auth";
-import {Close} from "@mui/icons-material";
+import {Close, CurrencyRupee, CurrencyRupeeOutlined} from "@mui/icons-material";
 
 class RegisterPage extends React.Component {
 
@@ -86,11 +86,26 @@ class RegisterPage extends React.Component {
                     return false
                 }
             } else {
-                this.showError("Enter a fields correctly")
+                this.showError("All fields are mandatory")
                 return false
             }
         }
 
+    }
+
+    refresh = () => {
+        this.setState({
+            name: "",
+            password: "",
+            email: "",
+            phoneNumber: "",
+            bankAccountNumber: "",
+            cnfBankAccountNumber: "",
+            ifscCode: "",
+            salary: "",
+            role: "office",
+            authentication: "phone",
+        })
     }
 
     snackbarAction = (
@@ -159,6 +174,7 @@ class RegisterPage extends React.Component {
                         this.showError("Failed to create user")
                     })
             }
+            this.refresh()
         }
     }
 
@@ -187,6 +203,7 @@ class RegisterPage extends React.Component {
                                                     <TextField
                                                         label="Name"
                                                         variant="filled"
+                                                        value={this.state.name}
                                                         onChange={(e) => {
                                                             this.setState({name: e.target.value})
                                                         }}
@@ -195,6 +212,7 @@ class RegisterPage extends React.Component {
                                                         label="Email"
                                                         variant="filled"
                                                         disabled={this.isPhoneAuth()}
+                                                        value={this.state.email}
                                                         onChange={(e) => {
                                                             this.setState({email: e.target.value})
                                                         }}
@@ -203,6 +221,7 @@ class RegisterPage extends React.Component {
                                                         label="Password"
                                                         variant="filled"
                                                         disabled={this.isPhoneAuth()}
+                                                        value={this.state.password}
                                                         onChange={(e) => {
                                                             this.setState({password: e.target.value})
                                                         }}
@@ -210,10 +229,13 @@ class RegisterPage extends React.Component {
                                                     <TextField
                                                         label="Phone No"
                                                         variant="filled"
+                                                        InputProps={{
+                                                            startAdornment: <InputAdornment position="start">+91</InputAdornment>,
+                                                        }}
+                                                        value={this.state.phoneNumber}
                                                         onChange={(e) => {
                                                             this.setState({phoneNumber: e.target.value})
                                                         }}
-                                                        type="number"
                                                         fullWidth/>
                                                 </Stack>
                                             </Paper>
@@ -270,6 +292,10 @@ class RegisterPage extends React.Component {
                                                     </FormControl>
                                                     <TextField label="Salary"
                                                                variant="filled"
+                                                               value={this.state.salary}
+                                                               InputProps={{
+                                                                   startAdornment: <InputAdornment position="start"><CurrencyRupee/></InputAdornment>,
+                                                               }}
                                                                onChange={(e) => {
                                                                    this.setState({salary: e.target.value})
                                                                }}
@@ -281,6 +307,7 @@ class RegisterPage extends React.Component {
                                                     <Typography variant="h5">Bank Details</Typography>
                                                     <TextField label="Bank Account"
                                                                variant="filled"
+                                                               value={this.state.bankAccountNumber}
                                                                onChange={(e) => {
                                                                    this.setState({bankAccountNumber: e.target.value})
                                                                }}
@@ -288,12 +315,14 @@ class RegisterPage extends React.Component {
                                                     <TextField label="Re-Enter Bank Account"
                                                                variant="filled"
                                                                type="password"
+                                                               value={this.state.cnfBankAccountNumber}
                                                                onChange={(e) => {
                                                                    this.setState({cnfBankAccountNumber: e.target.value})
                                                                }}
                                                                fullWidth/>
                                                     <TextField label="IFSC Code"
                                                                variant="filled"
+                                                               value={this.state.ifscCode}
                                                                onChange={(e) => {
                                                                    this.setState({ifscCode: e.target.value})
                                                                }}
@@ -309,7 +338,7 @@ class RegisterPage extends React.Component {
                             <Box style={{display: "flex", justifyContent: "center", gap: "20px"}}>
                                 <Button variant="contained" style={{padding: "10px 20px"}}
                                         onClick={this.handleRegister}>Register</Button>
-                                <Button variant="outlined" style={{padding: "10px 20px"}}>Clear</Button>
+                                <Button variant="outlined" style={{padding: "10px 20px"}} onClick={this.refresh}>Clear</Button>
                             </Box>
                         </Grow>
                     </Stack>
