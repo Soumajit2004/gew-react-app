@@ -13,6 +13,7 @@ const {
     WidthType
 } = require("docx");
 const serviceAccount = require('./ghosh-ele-works-firebase-adminsdk-heq28-c38f7ea580.json');
+const axios = require("axios").default;
 
 const app = admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
@@ -42,11 +43,10 @@ exports.docxPo = functions
             return `${ddDate(parseInt(date.getDate()))}-${ddDate(parseInt(date.getMonth()) + 1)}-${date.getFullYear()}`
         }
 
-        try {
-            const doc = await poRef.get();
-            const {material, poDate, issueNo, issueDate, description} = doc.data()
+        return poRef.get()
+            .then((r) => {
+                const {material, poDate, issueNo, issueDate, description} = r.data()
 
-            if (doc.exists) {
                 const table = new Table({
                     width: {
                         size: 9000,
@@ -97,7 +97,7 @@ exports.docxPo = functions
                     )
                 }
 
-                const file = await new Document({
+                return new Document({
                     sections: [{
                         properties: {},
                         children: [
@@ -163,19 +163,18 @@ exports.docxPo = functions
                         ],
                     }],
                 })
+            })
+            .then((file) => {
+                return Packer.toBuffer(file)
+            })
+            .then((buffer) => {
+                bucket.file(`po-downloads/${data.id}.docx`).save(buffer, () => ({status: "success"}))
+            })
+            .catch((e) => {
+                return {status: e.toString()}
+            })
 
-                const buffer = await Packer.toBuffer(file)
 
-                await bucket.file(`po-downloads/${data.id}.docx`).save(buffer)
-                return {
-                    status: "success"
-                }
-            }
-        } catch (e) {
-            return {
-                status: e.toString()
-            }
-        }
     })
 
 exports.deletePoDownloads = functions
@@ -188,4 +187,32 @@ exports.deletePoDownloads = functions
     .timeZone("Asia/Kolkata")
     .onRun(async () => {
         await bucket.deleteFiles({prefix: "po-downloads/"})
+    })
+
+exports.razorPayAccount = functions
+    .firestore
+    .document("users/{uid}")
+    .onCreate((snap, context) => {
+        const data = snap.data()
+
+        const config = {
+            url:"https://api.razorpay.com/v1/fund_accounts",
+            header:{
+                "Content-Type":"application/json",
+                "rzp_test_QRZLItMegWPVuN": "BlDdGZbelo9qMnY7JOj6MvXK"
+            },
+            body:{
+                "contact_id":snap.id,
+                "account_type":"bank_account",
+                "bank_account":{
+                    "name":data.name,
+                    "ifsc":data.ifscCode,
+                    "account_number":data.bankAccountNumber.toString()
+                }
+            }
+        }
+
+        return axios.post(config)
+            .then(r => console.log(r.data))
+            .catch(e => console.log(e.toString()))
     })

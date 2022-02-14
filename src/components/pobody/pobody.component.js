@@ -193,10 +193,11 @@ const PoViewBody = ({
                                                 }catch (e) {
                                                     doxPoFirebaseFnc({id: poNumber})
                                                         .then(async r => {
+                                                            console.log(r.data)
                                                             setTimeout(async () => {
                                                                 url = await getDownloadURL(poDocRef)
                                                                 downloadFromUrl(url)
-                                                            }, 5000)
+                                                            }, 10000)
                                                         })
                                                 }
                                                 handleMenuClose()
