@@ -2,7 +2,7 @@ import {initializeApp} from "firebase/app";
 import {getAnalytics} from "firebase/analytics";
 import {getAuth, browserSessionPersistence} from "firebase/auth";
 import {getFirestore, getDocFromCache, doc, getDoc} from "firebase/firestore";
-import { getFunctions, httpsCallable, connectFunctionsEmulator } from 'firebase/functions';
+import { getFunctions, httpsCallable} from 'firebase/functions';
 import { getStorage } from 'firebase/storage';
 
 const firebaseConfig = {
@@ -29,7 +29,7 @@ export const storage = getStorage(app);
 
 const functions = getFunctions(app, "asia-south1")
 
-
+export const createUserWithPhone = httpsCallable(functions, 'createUserWithPhone')
 export const doxPoFirebaseFnc = httpsCallable(functions, 'docxPo')
 
 export const customGetPoDoc = async (poId) => {

@@ -13,7 +13,7 @@ import {
 } from "@mui/material";
 import Box from "@mui/material/Box";
 import {createUserWithEmailAndPassword} from "firebase/auth";
-import {auth, db} from "../../firebase/firebase.utils";
+import {auth, createUserWithPhone, db} from "../../firebase/firebase.utils";
 import isEmail from 'validator/es/lib/isEmail';
 import isStrongPassword from 'validator/es/lib/isStrongPassword';
 import isMobilePhone from "validator/es/lib/isMobilePhone";
@@ -35,9 +35,9 @@ class RegisterPage extends React.Component {
             bankAccountNumber: "",
             cnfBankAccountNumber: "",
             ifscCode: "",
-            address: "",
             salary: "",
             role: "office",
+            authentication: "phone",
             snackbarOpen: false,
             snackbarMessage: "",
         }
@@ -63,28 +63,34 @@ class RegisterPage extends React.Component {
         }
     }
 
+    isPhoneAuth = () => this.state.authentication === "phone"
+
     validate = () => {
         const {
             name,
             password,
             email,
             phoneNumber,
-            address,
             salary,
-            role
+            role,
         } = this.state
 
-        if (name && isEmail(email) && isMobilePhone(phoneNumber) && isNumeric(salary) && role && address) {
-            if (isStrongPassword(password)) {
-                return this.validateBankDetails();
+        if (this.isPhoneAuth()) {
+            return !!(name && isMobilePhone(phoneNumber) && isNumeric(salary) && role);
+        } else {
+            if (name && isEmail(email) && isMobilePhone(phoneNumber) && isNumeric(salary) && role) {
+                if (isStrongPassword(password)) {
+                    return this.validateBankDetails();
+                } else {
+                    this.showError("Enter a strong password")
+                    return false
+                }
             } else {
-                this.showError("Enter a strong password")
+                this.showError("Enter a fields correctly")
                 return false
             }
-        } else {
-            this.showError("Enter a fields correctly")
-            return false
         }
+
     }
 
     snackbarAction = (
@@ -97,54 +103,69 @@ class RegisterPage extends React.Component {
         this.setState({snackbarOpen: true, snackbarMessage: message})
     }
 
-
-    handleRegister = () => {
+    firestoreRegister = (uid) => {
         const {
             name,
-            password,
-            email,
             phoneNumber,
             bankAccountNumber,
             ifscCode,
-            address,
             salary,
             role
         } = this.state
 
+        const userRef = doc(db, "users", uid)
+        setDoc(userRef, {
+            name: name,
+            phoneNumber: `+91${phoneNumber.toString()}`,
+            bankAccountNumber: parseInt(bankAccountNumber),
+            ifscCode: ifscCode,
+            salary: parseInt(salary),
+            role: role
+        })
+            .then(r => {
+                this.showError("User Created!")
+            })
+            .catch(e => {
+                this.showError(e.toString())
+                deleteUser(auth.currentUser).then(() => {
+                    console.log("User Deleted")
+                })
+            })
+    }
+
+    handleRegister = () => {
+        const {
+            password,
+            email,
+            phoneNumber,
+        } = this.state
+
         if (this.validate()) {
-            createUserWithEmailAndPassword(auth, email, password)
-                .then(r => {
-                    const userRef = doc(db, "users", r.user.uid)
-                    setDoc(userRef, {
-                        name: name,
-                        phoneNumber: parseInt(phoneNumber),
-                        bankAccountNumber: parseInt(bankAccountNumber),
-                        ifscCode: ifscCode,
-                        address: address,
-                        salary: parseInt(salary),
-                        role: role
+            if (this.isPhoneAuth()) {
+                createUserWithPhone({phoneNumber: `+91${phoneNumber.toString()}`})
+                    .then(r => {
+                        console.log(r.data)
+                        this.firestoreRegister(r.data.uid)
                     })
-                        .then(r => {
-                            this.showError("User Created!")
-                            window.location.reload();
-                        })
-                        .catch(e => {
-                            this.showError(e.toString())
-                            deleteUser(auth.currentUser).then(() => {
-                                console.log("User Deleted")
-                            })
-                        })
-                })
-                .catch(() => {
-                    this.showError("Failed to create user")
-                })
+                    .catch(() => {
+                        this.showError("Failed to create user")
+                    })
+            } else {
+                createUserWithEmailAndPassword(auth, email, password)
+                    .then(r => {
+                        this.firestoreRegister(r.user.uid)
+                    })
+                    .catch(() => {
+                        this.showError("Failed to create user")
+                    })
+            }
         }
     }
 
     render() {
         return (
             <HeaderComponent title="Register">
-                <Container style={{height:"80vh"}}>
+                <Container style={{height: "80vh"}}>
                     <Stack spacing={4}>
                         <Snackbar open={this.state.snackbarOpen}
                                   action={this.snackbarAction}
@@ -159,97 +180,127 @@ class RegisterPage extends React.Component {
                             <Grow in>
                                 <Grid container spacing={4}>
                                     <Grid item sm={12} md={6} style={{width: "100%"}}>
-                                        <Paper elevation={6}>
-                                            <Stack spacing={2} padding={2}>
-                                                <Typography variant="h5">Personal Details</Typography>
-                                                <TextField
-                                                    label="Name"
-                                                    variant="filled"
-                                                    onChange={(e) => {
-                                                        this.setState({name: e.target.value})
-                                                    }}
-                                                    fullWidth/>
-
-                                                <TextField
-                                                    label="Password"
-                                                    variant="filled"
-                                                    onChange={(e) => {
-                                                        this.setState({password: e.target.value})
-                                                    }}
-                                                    fullWidth/>
-
-                                                <TextField
-                                                    label="Email"
-                                                    variant="filled"
-                                                    onChange={(e) => {
-                                                        this.setState({email: e.target.value})
-                                                    }}
-                                                    fullWidth/>
-
-                                                <TextField
-                                                    label="Phone No"
-                                                    variant="filled"
-                                                    onChange={(e) => {
-                                                        this.setState({phoneNumber: e.target.value})
-                                                    }}
-                                                    type="number"
-                                                    fullWidth/>
-
-                                                <TextField label="Address"
-                                                           variant="filled"
-                                                           onChange={(e) => {
-                                                               this.setState({address: e.target.value})
-                                                           }}
-                                                           fullWidth/>
-                                            </Stack>
-                                        </Paper>
+                                        <Stack spacing={2}>
+                                            <Paper elevation={6}>
+                                                <Stack spacing={2} padding={2}>
+                                                    <Typography variant="h5">Personal Details</Typography>
+                                                    <TextField
+                                                        label="Name"
+                                                        variant="filled"
+                                                        onChange={(e) => {
+                                                            this.setState({name: e.target.value})
+                                                        }}
+                                                        fullWidth/>
+                                                    <TextField
+                                                        label="Email"
+                                                        variant="filled"
+                                                        disabled={this.isPhoneAuth()}
+                                                        onChange={(e) => {
+                                                            this.setState({email: e.target.value})
+                                                        }}
+                                                        fullWidth/>
+                                                    <TextField
+                                                        label="Password"
+                                                        variant="filled"
+                                                        disabled={this.isPhoneAuth()}
+                                                        onChange={(e) => {
+                                                            this.setState({password: e.target.value})
+                                                        }}
+                                                        fullWidth/>
+                                                    <TextField
+                                                        label="Phone No"
+                                                        variant="filled"
+                                                        onChange={(e) => {
+                                                            this.setState({phoneNumber: e.target.value})
+                                                        }}
+                                                        type="number"
+                                                        fullWidth/>
+                                                </Stack>
+                                            </Paper>
+                                            <Paper elevation={6}>
+                                                <Stack spacing={1.5} padding={2}>
+                                                    <Typography variant="h5">Important Note!</Typography>
+                                                    <Typography>
+                                                        To create a user with phone authentication set authentication
+                                                        method to phone and keep the email and password fields empty.
+                                                    </Typography>
+                                                    <Typography>
+                                                        Users created using email also can sign-in with their phone
+                                                        number.
+                                                        To use email authentication change authentication method to
+                                                        email in which all fields are mandatory
+                                                    </Typography>
+                                                </Stack>
+                                            </Paper>
+                                        </Stack>
                                     </Grid>
                                     <Grid item sm={12} md={6} style={{width: "100%"}}>
-                                        <Paper elevation={6}>
-                                            <Stack spacing={2} padding={2}>
-                                                <Typography variant="h5">Office Details</Typography>
-                                                <TextField label="Bank Account"
-                                                           variant="filled"
-                                                           onChange={(e) => {
-                                                               this.setState({bankAccountNumber: e.target.value})
-                                                           }}
-                                                           fullWidth/>
-                                                <TextField label="Re-Enter Bank Account"
-                                                           variant="filled"
-                                                           type="password"
-                                                           onChange={(e) => {
-                                                               this.setState({cnfBankAccountNumber: e.target.value})
-                                                           }}
-                                                           fullWidth/>
-                                                <TextField label="Salary"
-                                                           variant="filled"
-                                                           onChange={(e) => {
-                                                               this.setState({salary: e.target.value})
-                                                           }}
-                                                           fullWidth/>
-
-                                                <TextField label="IFSC Code"
-                                                           variant="filled"
-                                                           onChange={(e) => {
-                                                               this.setState({ifscCode: e.target.value})
-                                                           }}
-                                                           fullWidth/>
-                                                <FormControl variant="filled" fullWidth>
-                                                    <InputLabel id="role-selection">Role</InputLabel>
-                                                    <Select
-                                                        labelId="role-selection"
-                                                        id="role-selection"
-                                                        value={this.state.role}
-                                                        onChange={(e) => {
-                                                            this.setState({role: e.target.value})
-                                                        }}
-                                                    >
-                                                        <MenuItem value="office">Office Employee</MenuItem>
-                                                        <MenuItem value="field">Field Employee</MenuItem>
-                                                    </Select>
-                                                </FormControl>
-                                            </Stack>
-                                        </Paper>
+                                        <Stack spacing={2}>
+                                            <Paper elevation={6}>
+                                                <Stack spacing={2} padding={2}>
+                                                    <Typography variant="h5">Office Details</Typography>
+                                                    <FormControl variant="filled" fullWidth>
+                                                        <InputLabel id="role-selection">Authentication
+                                                            Method</InputLabel>
+                                                        <Select
+                                                            labelId="role-selection"
+                                                            id="role-selection"
+                                                            value={this.state.authentication}
+                                                            onChange={(e) => {
+                                                                this.setState({authentication: e.target.value})
+                                                            }}
+                                                        >
+                                                            <MenuItem value="phone">Phone</MenuItem>
+                                                            <MenuItem value="email">Email</MenuItem>
+                                                        </Select>
+                                                    </FormControl>
+                                                    <FormControl variant="filled" fullWidth>
+                                                        <InputLabel id="role-selection">Role</InputLabel>
+                                                        <Select
+                                                            labelId="role-selection"
+                                                            id="role-selection"
+                                                            value={this.state.role}
+                                                            onChange={(e) => {
+                                                                this.setState({role: e.target.value})
+                                                            }}
+                                                        >
+                                                            <MenuItem value="office">Office Employee</MenuItem>
+                                                            <MenuItem value="field">Field Employee</MenuItem>
+                                                        </Select>
+                                                    </FormControl>
+                                                    <TextField label="Salary"
+                                                               variant="filled"
+                                                               onChange={(e) => {
+                                                                   this.setState({salary: e.target.value})
+                                                               }}
+                                                               fullWidth/>
+                                                </Stack>
+                                            </Paper>
+                                            <Paper elevation={6}>
+                                                <Stack spacing={2} padding={2}>
+                                                    <Typography variant="h5">Bank Details</Typography>
+                                                    <TextField label="Bank Account"
+                                                               variant="filled"
+                                                               onChange={(e) => {
+                                                                   this.setState({bankAccountNumber: e.target.value})
+                                                               }}
+                                                               fullWidth/>
+                                                    <TextField label="Re-Enter Bank Account"
+                                                               variant="filled"
+                                                               type="password"
+                                                               onChange={(e) => {
+                                                                   this.setState({cnfBankAccountNumber: e.target.value})
+                                                               }}
+                                                               fullWidth/>
+                                                    <TextField label="IFSC Code"
+                                                               variant="filled"
+                                                               onChange={(e) => {
+                                                                   this.setState({ifscCode: e.target.value})
+                                                               }}
+                                                               fullWidth/>
+                                                </Stack>
+                                            </Paper>
+                                        </Stack>
                                     </Grid>
                                 </Grid>
                             </Grow>

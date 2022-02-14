@@ -13,7 +13,6 @@ const {
     WidthType
 } = require("docx");
 const serviceAccount = require('./ghosh-ele-works-firebase-adminsdk-heq28-c38f7ea580.json');
-const axios = require("axios").default;
 
 const app = admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
@@ -21,6 +20,7 @@ const app = admin.initializeApp({
 });
 
 const bucket = admin.storage().bucket();
+const auth = admin.auth(app);
 const db = admin.firestore(app)
 
 exports.docxPo = functions
@@ -168,7 +168,10 @@ exports.docxPo = functions
                 return Packer.toBuffer(file)
             })
             .then((buffer) => {
-                bucket.file(`po-downloads/${data.id}.docx`).save(buffer, () => ({status: "success"}))
+                return bucket.file(`po-downloads/${data.id}.docx`).save(buffer)
+            })
+            .then(() => {
+                return {status: "success"}
             })
             .catch((e) => {
                 return {status: e.toString()}
@@ -189,30 +192,20 @@ exports.deletePoDownloads = functions
         await bucket.deleteFiles({prefix: "po-downloads/"})
     })
 
-exports.razorPayAccount = functions
-    .firestore
-    .document("users/{uid}")
-    .onCreate((snap, context) => {
-        const data = snap.data()
+exports.createUserWithPhone = functions
+    .region("asia-south1")
+    .https.onCall((data, context) => {
+        const {phoneNumber} = data
 
-        const config = {
-            url:"https://api.razorpay.com/v1/fund_accounts",
-            header:{
-                "Content-Type":"application/json",
-                "rzp_test_QRZLItMegWPVuN": "BlDdGZbelo9qMnY7JOj6MvXK"
-            },
-            body:{
-                "contact_id":snap.id,
-                "account_type":"bank_account",
-                "bank_account":{
-                    "name":data.name,
-                    "ifsc":data.ifscCode,
-                    "account_number":data.bankAccountNumber.toString()
-                }
-            }
+        if (context.auth.uid) {
+            return auth.createUser({
+                phoneNumber: phoneNumber
+            })
+                .then(r => {
+                    return {uid: r.uid}
+                })
+                .catch(e => {
+                    return {error: e.toString()}
+                })
         }
-
-        return axios.post(config)
-            .then(r => console.log(r.data))
-            .catch(e => console.log(e.toString()))
     })
