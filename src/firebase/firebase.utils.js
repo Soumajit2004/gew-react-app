@@ -1,9 +1,9 @@
 import {initializeApp} from "firebase/app";
 import {getAnalytics} from "firebase/analytics";
-import {getAuth, browserSessionPersistence, setPersistence} from "firebase/auth";
-import {getFirestore, getDocFromCache, doc, getDoc} from "firebase/firestore";
-import { getFunctions, httpsCallable} from 'firebase/functions';
-import { getStorage } from 'firebase/storage';
+import {getAuth, browserSessionPersistence, setPersistence, connectAuthEmulator} from "firebase/auth";
+import {getFirestore, getDocFromCache, doc, getDoc, connectFirestoreEmulator} from "firebase/firestore";
+import { getFunctions, httpsCallable, connectFunctionsEmulator} from 'firebase/functions';
+import { getStorage, connectStorageEmulator} from 'firebase/storage';
 
 const firebaseConfig = {
     apiKey: "AIzaSyB-8K5SLVIWTiOQiJF1Sb4jLU4xDtKJ92c",
@@ -20,17 +20,23 @@ const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
 
 export const auth = getAuth(app)
-
-setPersistence(auth, browserSessionPersistence).then(r => {})
-
 export const db = getFirestore(app)
-
 export const storage = getStorage(app);
-
 const functions = getFunctions(app, "asia-south1")
+
+if (process.env.NODE_ENV === 'development'){
+    connectAuthEmulator(auth, "http://localhost:9099")
+    connectFirestoreEmulator(db, 'localhost', 8080);
+    connectStorageEmulator(storage, "localhost", 9199);
+    connectFunctionsEmulator(functions, "localhost", 5001);
+}
+
 
 export const createUserWithPhone = httpsCallable(functions, 'createUserWithPhone')
 export const doxPoFirebaseFnc = httpsCallable(functions, 'docxPo')
+
+
+setPersistence(auth, browserSessionPersistence).then(r => {})
 
 export const customGetPoDoc = async (poId) => {
     const docRef = doc(db, "po", poId.toString());

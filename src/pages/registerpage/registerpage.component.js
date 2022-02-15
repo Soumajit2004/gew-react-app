@@ -125,7 +125,8 @@ class RegisterPage extends React.Component {
             bankAccountNumber,
             ifscCode,
             salary,
-            role
+            role,
+            authentication
         } = this.state
 
         const userRef = doc(db, "users", uid)
@@ -135,7 +136,8 @@ class RegisterPage extends React.Component {
             bankAccountNumber: bankAccountNumber,
             ifscCode: ifscCode,
             salary: salary,
-            role: role
+            role: role,
+            authMethod:authentication
         })
             .then(r => {
                 this.showError("User Created!")

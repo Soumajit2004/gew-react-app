@@ -20,8 +20,8 @@ import {
     Typography
 } from "@mui/material";
 import "./signinpage.styles.scss";
-import {auth, db} from "../../firebase/firebase.utils";
-import {Close} from "@mui/icons-material";
+import { auth, db } from "../../firebase/firebase.utils";
+import { Close } from "@mui/icons-material";
 import isEmail from "validator/es/lib/isEmail";
 import Divider from "@mui/material/Divider";
 import isMobilePhone from "validator/es/lib/isMobilePhone";
@@ -32,7 +32,7 @@ class SignInPage extends React.Component {
 
         this.state = {
             snackbarOpen: false,
-            recaptchaReady : false,
+            recaptchaReady: false,
             snackbarMessage: "",
             otpOpen: false,
             otp: "",
@@ -45,11 +45,11 @@ class SignInPage extends React.Component {
     }
 
     recaptchaVerifier = () => {
-        if (!this.state.recaptchaReady){
+        if (!this.state.recaptchaReady) {
             window.recaptchaVerifier = new RecaptchaVerifier('recaptcha-container', {
                 'size': 'invisible',
             }, auth)
-            this.setState({recaptchaReady:true})
+            this.setState({ recaptchaReady: true })
         }
     }
 
@@ -69,20 +69,24 @@ class SignInPage extends React.Component {
 
             getDocs(query(collection(db, "users"), where("phoneNumber", "==", `+91${phoneNumber}`)))
                 .then(r => {
-                    if (r) {
-                        this.recaptchaVerifier()
-                        const appVerifier = window.recaptchaVerifier;
+                    try {
+                        const user = r.docs[0].data()
+                        if (user.phoneNumber === `+91${phoneNumber}` && user.authMethod === `phone`) {
+                            this.recaptchaVerifier()
+                            const appVerifier = window.recaptchaVerifier;
 
-                        return signInWithPhoneNumber(auth, `+91${phoneNumber}`, appVerifier)
-                            .then(r => {
-                                this.setState({verifier: r})
-                                this.setOtpDialog(true)
-                            })
-                            .catch((error) => {
-                                this.showError(error.toString())
-                            })
-                    } else {
-                        throw Error
+                            return signInWithPhoneNumber(auth, `+91${phoneNumber}`, appVerifier)
+                                .then(r => {
+                                    this.setState({ verifier: r })
+                                    this.setOtpDialog(true)
+                                })
+                                .catch((error) => {
+                                    this.showError(error.toString())
+                                })
+                        } else { this.showError("Sign-in with your email & password") }
+                    }
+                    catch (error) { 
+                        this.showError("Phone no not registered !")
                     }
                 })
                 .catch((e) => {
@@ -122,35 +126,35 @@ class SignInPage extends React.Component {
     }
 
     snackbarAction = (
-        <IconButton onClick={() => this.setState({snackbarOpen: false})}>
-            <Close/>
+        <IconButton onClick={() => this.setState({ snackbarOpen: false })}>
+            <Close />
         </IconButton>
     )
 
     showError = (message) => {
-        this.setState({snackbarOpen: true, snackbarMessage: message})
+        this.setState({ snackbarOpen: true, snackbarMessage: message })
     }
 
     setOtpDialog = (bool) => {
-        this.setState({otpOpen: bool})
+        this.setState({ otpOpen: bool })
     }
 
     render() {
-        return <Grid container component="main" sx={{height: '100vh'}}>
-            <div id='recaptcha-container'/>
+        return <Grid container component="main" sx={{ height: '100vh' }}>
+            <div id='recaptcha-container' />
             <Snackbar open={this.state.snackbarOpen}
-                      action={this.snackbarAction}
-                      autoHideDuration={6000}
-                      message={this.state.snackbarMessage}
-                      onClose={() => {
-                          this.setState({snackbarOpen: false})
-                      }}
+                action={this.snackbarAction}
+                autoHideDuration={6000}
+                message={this.state.snackbarMessage}
+                onClose={() => {
+                    this.setState({ snackbarOpen: false })
+                }}
             />
             <Dialog open={this.state.otpOpen}
-                    disableEscapeKeyDown={true}
-                    onClose={() => {
-                        this.setOtpDialog(false)
-                    }}>
+                disableEscapeKeyDown={true}
+                onClose={() => {
+                    this.setOtpDialog(false)
+                }}>
                 <DialogTitle>Enter OTP</DialogTitle>
                 <DialogContent>
                     <DialogContentText>
@@ -164,7 +168,7 @@ class SignInPage extends React.Component {
                         fullWidth
                         variant="standard"
                         onChange={(e) => {
-                            this.setState({otp: e.target.value})
+                            this.setState({ otp: e.target.value })
                         }}
                     />
                 </DialogContent>
@@ -182,7 +186,7 @@ class SignInPage extends React.Component {
                 md={7}
                 className="cover-image"
             />
-            <Grid item xs={12} sm={8} md={5} component={Paper} elevation={6} square style={{display: "grid"}}>
+            <Grid item xs={12} sm={8} md={5} component={Paper} elevation={6} square style={{ display: "grid" }}>
                 <Box
                     sx={{
                         my: 8,
@@ -207,7 +211,7 @@ class SignInPage extends React.Component {
                                 name="email"
                                 autoComplete="email"
                                 autoFocus
-                                onChange={e => this.setState({email: e.target.value})}
+                                onChange={e => this.setState({ email: e.target.value })}
                             />
                             <TextField
                                 margin="normal"
@@ -217,10 +221,10 @@ class SignInPage extends React.Component {
                                 type="password"
                                 id="password"
                                 autoComplete="current-password"
-                                onChange={e => this.setState({password: e.target.value})}
+                                onChange={e => this.setState({ password: e.target.value })}
                             />
                         </Box>
-                        <Divider/>
+                        <Divider />
                         <TextField
                             margin="normal"
                             fullWidth
@@ -231,14 +235,14 @@ class SignInPage extends React.Component {
                             }}
                             id="phone"
                             autoComplete="phone-number"
-                            onChange={e => this.setState({phoneNumber: e.target.value})}
+                            onChange={e => this.setState({ phoneNumber: e.target.value })}
                         />
                         <Button
                             type="submit"
                             fullWidth
                             id="sign-in-button"
                             variant="contained"
-                            sx={{mt: 3, mb: 2}}
+                            sx={{ mt: 3, mb: 2 }}
                             onClick={this.handleSubmit}
                         >
                             Sign In
@@ -248,7 +252,7 @@ class SignInPage extends React.Component {
                                 fullWidth
                                 id="otp-button"
                                 variant="outlined"
-                                sx={{mt: 3, mb: 2}}
+                                sx={{ mt: 3, mb: 2 }}
                                 onClick={() => {
                                     this.setOtpDialog(true)
                                 }}
@@ -257,7 +261,7 @@ class SignInPage extends React.Component {
                             </Button> : null
                         }
 
-                        <Grid container style={{display: "flex", justifyContent: "center"}}>
+                        <Grid container style={{ display: "flex", justifyContent: "center" }}>
                             <Grid item>
                                 <Link variant="body2" onClick={this.handleForgotPassword}>
                                     Forgot password?
