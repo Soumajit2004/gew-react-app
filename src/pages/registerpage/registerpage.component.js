@@ -20,7 +20,7 @@ import isMobilePhone from "validator/es/lib/isMobilePhone";
 import isNumeric from "validator/es/lib/isNumeric";
 import {doc, setDoc} from "firebase/firestore";
 import {deleteUser} from "firebase/auth";
-import {Close, CurrencyRupee, CurrencyRupeeOutlined} from "@mui/icons-material";
+import {Close, CurrencyRupee} from "@mui/icons-material";
 
 class RegisterPage extends React.Component {
 
@@ -132,9 +132,9 @@ class RegisterPage extends React.Component {
         setDoc(userRef, {
             name: name,
             phoneNumber: `+91${phoneNumber.toString()}`,
-            bankAccountNumber: parseInt(bankAccountNumber),
+            bankAccountNumber: bankAccountNumber,
             ifscCode: ifscCode,
-            salary: parseInt(salary),
+            salary: salary,
             role: role
         })
             .then(r => {
@@ -161,6 +161,7 @@ class RegisterPage extends React.Component {
                     .then(r => {
                         console.log(r.data)
                         this.firestoreRegister(r.data.uid)
+                        this.refresh()
                     })
                     .catch(() => {
                         this.showError("Failed to create user")
@@ -169,12 +170,12 @@ class RegisterPage extends React.Component {
                 createUserWithEmailAndPassword(auth, email, password)
                     .then(r => {
                         this.firestoreRegister(r.user.uid)
+                        this.refresh()
                     })
                     .catch(() => {
                         this.showError("Failed to create user")
                     })
             }
-            this.refresh()
         }
     }
 

@@ -38,13 +38,11 @@ class App extends React.Component {
         this.unsubscribeFromAuth()
     }
 
-
-
     render() {
         const {currentUser} = this.props
 
         return (
-            <div className="App">
+            <div className="App" id="app">
                 <Switch>
                     <Route exact path="/" component={HomePage}/>
                     <Route exact path="/sign-in" render={() => (currentUser ? <Redirect to="/dashboard"/> : <SignInPage/>)}/>

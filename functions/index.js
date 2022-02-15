@@ -26,8 +26,8 @@ const db = admin.firestore(app)
 exports.docxPo = functions
     .region("asia-south1")
     .runWith({
-        timeoutSeconds: 180,
-        memory: "1GB"
+        timeoutSeconds: 120,
+        memory: "512MB"
     })
     .https.onCall(async (data, context) => {
         const poRef = db.collection('po').doc(data.id);
@@ -182,7 +182,7 @@ exports.docxPo = functions
 
 exports.deletePoDownloads = functions
     .runWith({
-        timeoutSeconds: 120,
+        timeoutSeconds: 60,
         memory: "128MB"
     })
     .region("asia-south1")
@@ -193,6 +193,10 @@ exports.deletePoDownloads = functions
     })
 
 exports.createUserWithPhone = functions
+    .runWith({
+        timeoutSeconds: 60,
+        memory: "128MB"
+    })
     .region("asia-south1")
     .https.onCall((data, context) => {
         const {phoneNumber} = data

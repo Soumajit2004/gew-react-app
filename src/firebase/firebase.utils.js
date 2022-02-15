@@ -1,6 +1,6 @@
 import {initializeApp} from "firebase/app";
 import {getAnalytics} from "firebase/analytics";
-import {getAuth, browserSessionPersistence} from "firebase/auth";
+import {getAuth, browserSessionPersistence, setPersistence} from "firebase/auth";
 import {getFirestore, getDocFromCache, doc, getDoc} from "firebase/firestore";
 import { getFunctions, httpsCallable} from 'firebase/functions';
 import { getStorage } from 'firebase/storage';
@@ -21,7 +21,7 @@ const analytics = getAnalytics(app);
 
 export const auth = getAuth(app)
 
-auth.setPersistence(browserSessionPersistence).then(r => {})
+setPersistence(auth, browserSessionPersistence).then(r => {})
 
 export const db = getFirestore(app)
 

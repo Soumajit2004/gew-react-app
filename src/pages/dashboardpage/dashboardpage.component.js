@@ -1,12 +1,10 @@
 import React from "react";
 import HeaderComponent from "../../components/header/header.component";
-import {Container, Divider, Grid, Stack, Typography} from "@mui/material";
+import {Container, Divider, Stack, Typography} from "@mui/material";
 import {connect} from "react-redux";
 import {selectCurrentUser} from "../../redux/user/user.selector";
 import {db} from "../../firebase/firebase.utils";
 import {query, collection, orderBy, limit, getDocs} from "firebase/firestore";
-import {selectRecentPo} from "../../redux/po/po.selectors.";
-import {setCurrentUser} from "../../redux/user/user.actions";
 import {setRecentPo} from "../../redux/po/po.actions.";
 import RecentPo from "../../components/recentPo/recentPo.component";
 
