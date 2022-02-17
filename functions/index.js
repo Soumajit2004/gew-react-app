@@ -194,7 +194,7 @@ exports.deletePoDownloads = functions
 
 exports.createUserWithPhone = functions
     .runWith({
-        timeoutSeconds: 60,
+        timeoutSeconds: 30,
         memory: "128MB"
     })
     .region("asia-south1")

@@ -58,14 +58,10 @@ class PoPage extends React.Component {
     getBodyComponent = () => {
         const {setSearchText, addMode, editMode, viewMode, toggleAddMode} = this.props
 
-        if (addMode) {
+        if (addMode || editMode) {
             return <PoEditAdd/>
         } else if (viewMode) {
-            if (editMode) {
-                return <PoEditAdd/>
-            } else {
-                return <PoViewBody handleSearch={this.handleSearch}/>
-            }
+            return <PoViewBody handleSearch={this.handleSearch}/>
         } else {
             return (
                 <Grow in>

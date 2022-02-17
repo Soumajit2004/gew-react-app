@@ -7,23 +7,36 @@ import {db} from "../../firebase/firebase.utils";
 import {query, collection, orderBy, limit, getDocs} from "firebase/firestore";
 import {setRecentPo} from "../../redux/po/po.actions.";
 import RecentPo from "../../components/recentPo/recentPo.component";
+import withSpinner from "../../components/withSpinner/withSpinner.component";
+
+const RecentPoWithSpinner = withSpinner(RecentPo)
 
 class DashboardPage extends React.Component {
 
-    constructor(props) {
-        super(props);
-
-        this.query = query(collection(db, "po"), orderBy("lastEditedTime", "desc"), limit(10))
-        const {setRecentPo} = this.props
-        getDocs(this.query).then(r => {
-            setRecentPo(r)
-        })
+    state = {
+        loading: true
     }
 
+    componentDidMount() {
+        const {setRecentPo} = this.props
+
+        const q = query(collection(db, "po"), orderBy("lastEditedTime", "desc"), limit(12))
+        getDocs(q)
+            .then(r => {
+                setRecentPo(r)
+                this.stopLoading()
+            })
+            .catch(e => {
+                this.stopLoading()
+            })
+    }
+
+    stopLoading = () => {this.setState({loading:false})}
 
     // eslint-disable-next-line react/require-render-return
     render() {
         const {currentUser: {name}} = this.props
+        const {loading} = this.state
 
         return (
             <HeaderComponent title="Dashboard">
@@ -36,7 +49,7 @@ class DashboardPage extends React.Component {
                             Welcome, {name} !
                         </Typography>
                         <Divider/>
-                        <RecentPo/>
+                        <RecentPoWithSpinner isLoading={loading}/>
                     </Stack>
                 </Container>
             </HeaderComponent>

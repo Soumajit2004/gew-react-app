@@ -70,6 +70,7 @@ class SignInPage extends React.Component {
             getDocs(query(collection(db, "users"), where("phoneNumber", "==", `+91${phoneNumber}`)))
                 .then(r => {
                     try {
+
                         const user = r.docs[0].data()
                         if (user.phoneNumber === `+91${phoneNumber}` && user.authMethod === `phone`) {
                             this.recaptchaVerifier()
@@ -84,6 +85,8 @@ class SignInPage extends React.Component {
                                     this.showError(error.toString())
                                 })
                         } else { this.showError("Sign-in with your email & password") }
+
+
                     }
                     catch (error) { 
                         this.showError("Phone no not registered !")
