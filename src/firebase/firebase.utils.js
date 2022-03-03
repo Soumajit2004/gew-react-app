@@ -34,6 +34,7 @@ if (process.env.NODE_ENV === 'development'){
 
 export const createUserWithPhone = httpsCallable(functions, 'createUserWithPhone')
 export const doxPoFirebaseFnc = httpsCallable(functions, 'docxPo')
+export const payUserFnc = httpsCallable(functions, 'payUsers')
 
 
 setPersistence(auth, browserSessionPersistence).then(r => {})

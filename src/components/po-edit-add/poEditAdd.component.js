@@ -6,13 +6,12 @@ import {
     Grow,
     IconButton,
     Paper,
-    Snackbar,
     Stack,
     TextField,
     Typography
 } from "@mui/material";
 import "./poEditAdd.styles.scss"
-import {Add, CancelOutlined, Close, Delete, Save} from "@mui/icons-material";
+import {Add, CancelOutlined,Delete, Save} from "@mui/icons-material";
 import Box from "@mui/material/Box";
 import {doc, setDoc, Timestamp, updateDoc} from "firebase/firestore";
 import {customGetPoDoc, db} from "../../firebase/firebase.utils";
@@ -26,6 +25,7 @@ import {
 } from "../../redux/po/po.selectors.";
 import {setPoData, toggleAddMode, toggleEditMode, toggleViewMode} from "../../redux/po/po.actions.";
 import LoadingSpinner from "../withSpinner/isLoadingSpinner";
+import {showMessage} from "../../redux/snackbar/snackbar.actions";
 
 
 class PoEditAdd extends React.Component {
@@ -41,8 +41,6 @@ class PoEditAdd extends React.Component {
         }
 
         this.state = {
-            snackbarOpen: false,
-            snackbarMessage: "",
             rows: editMode ? initMat : [{matName: "", quantity: "", unit: ""}],
             poNumber: editMode ? poNumber : "",
             issueNumber: editMode ? issueNo : "",
@@ -51,16 +49,6 @@ class PoEditAdd extends React.Component {
             description: editMode ? description : "",
             isLoading: false
         }
-    }
-
-    snackbarAction = (
-        <IconButton onClick={() => this.setState({snackbarOpen: false})} style={{color: "white"}}>
-            <Close/>
-        </IconButton>
-    )
-
-    showError = (message) => {
-        this.setState({snackbarOpen: true, snackbarMessage: message})
     }
 
     toggleLoading = () => {
@@ -83,23 +71,24 @@ class PoEditAdd extends React.Component {
         }
     }
 
-    refreshPoDetails = (poNumber, callback) => {
+    refreshPoDetails = async (poNumber, callback) => {
         const {setPoData} = this.props
 
-        customGetPoDoc(poNumber)
-            .then((e) => {
-                const data = e.data()
-                if (data) {
-                    setPoData({poNumber: e.id, ...data})
-                }
+        try {
+            const data = (await customGetPoDoc(poNumber)).data()
+            if (data) {
+                setPoData({poNumber: poNumber, ...data})
+            }
+            callback()
+        }
+        catch (e) {
 
-                callback()
-            })
+        }
     }
 
     handleSave = async () => {
         const {poNumber, issueNumber, poDate, issueDate, description, rows} = this.state
-        const {editMode, viewMode, addMode, currentUser: {name}, toggleEditMode, toggleAddMode} = this.props
+        const {editMode, viewMode, addMode, currentUser: {name}, toggleEditMode, toggleAddMode, showMessage} = this.props
 
         // validating fields
         if (this.validateFields()) {
@@ -127,9 +116,9 @@ class PoEditAdd extends React.Component {
                         lastEditedTime: Timestamp.fromDate(new Date())
                     })
 
-                    viewMode ? this.refreshPoDetails(poNumber, toggleAddMode) : toggleAddMode()
+                    viewMode ? await this.refreshPoDetails(poNumber, toggleAddMode) : toggleAddMode()
                 } catch (e) {
-                    this.showError("Failed to add P.O")
+                    showMessage("Failed to add P.O")
                 }
             } else if (editMode) {
                 // updating existing doc
@@ -144,18 +133,16 @@ class PoEditAdd extends React.Component {
                         lastEditedTime: Timestamp.fromDate(new Date())
                     })
 
-                    this.refreshPoDetails(poNumber, toggleEditMode)
+                    await this.refreshPoDetails(poNumber, toggleEditMode)
                 }catch(e){
-                    this.showError(e.toString())
+                    showMessage(e.message)
                 }
             }
-
             // loading state: false
             this.toggleLoading()
 
-
         } else {
-            this.showError("Invalid Data")
+            showMessage("Invalid Data !")
         }
     }
 
@@ -168,15 +155,6 @@ class PoEditAdd extends React.Component {
                 isLoading ? (<LoadingSpinner/>) : (
                     <Paper elevation={6} style={{overflowY: "scroll"}}>
                         <Stack>
-                            <Snackbar open={this.state.snackbarOpen}
-                                      action={this.snackbarAction}
-                                      autoHideDuration={6000}
-                                      message={this.state.snackbarMessage}
-                                      style={{color: "white"}}
-                                      onClose={() => {
-                                          this.setState({snackbarOpen: false})
-                                      }}
-                            />
                             <Grid container spacing={2} padding={2}>
                                 <Grid item sm={12} md={6}>
                                     <div style={{display: "flex", alignItems: "flex-end"}}>
@@ -337,7 +315,8 @@ const mapDispatchToProps = dispatch => ({
     setPoData: po => dispatch(setPoData(po)),
     toggleViewMode: () => dispatch(toggleViewMode()),
     toggleEditMode: () => dispatch(toggleEditMode()),
-    toggleAddMode: () => dispatch(toggleAddMode())
+    toggleAddMode: () => dispatch(toggleAddMode()),
+    showMessage: message => dispatch(showMessage(message))
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(PoEditAdd)

@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useEffect, useState} from "react";
 import HeaderComponent from "../../components/header/header.component";
 import {Container, Divider, Stack, Typography} from "@mui/material";
 import {connect} from "react-redux";
@@ -8,53 +8,44 @@ import {query, collection, orderBy, limit, getDocs} from "firebase/firestore";
 import {setRecentPo} from "../../redux/po/po.actions.";
 import RecentPo from "../../components/recentPo/recentPo.component";
 import withSpinner from "../../components/withSpinner/withSpinner.component";
+import {showMessage} from "../../redux/snackbar/snackbar.actions";
 
 const RecentPoWithSpinner = withSpinner(RecentPo)
 
-class DashboardPage extends React.Component {
+const DashboardPage = ({setRecentPo, currentUser:{name}}, showMessage) => {
 
-    state = {
-        loading: true
-    }
+    const [loading, setLoading] = useState(true)
 
-    componentDidMount() {
-        const {setRecentPo} = this.props
+    useEffect(() => {
+        const fetchPo =  async () => {
+            try{
+                const data = await getDocs(query(collection(db, "po"), orderBy("lastEditedTime", "desc"), limit(12)))
+                setRecentPo(data)
+                setLoading(false)
+            }catch (e) {
+                showMessage(e.message)
+                setLoading(false)
+            }
+        }
+        fetchPo()
+    }, [])
 
-        const q = query(collection(db, "po"), orderBy("lastEditedTime", "desc"), limit(12))
-        getDocs(q)
-            .then(r => {
-                setRecentPo(r)
-                this.stopLoading()
-            })
-            .catch(e => {
-                this.stopLoading()
-            })
-    }
-
-    stopLoading = () => {this.setState({loading:false})}
-
-    // eslint-disable-next-line react/require-render-return
-    render() {
-        const {currentUser: {name}} = this.props
-        const {loading} = this.state
-
-        return (
-            <HeaderComponent title="Dashboard">
-                <Container>
-                    <Stack spacing={2}>
-                        <Typography variant="h3"
-                                    component="h3"
-                                    fontSize={35}
-                                    fontWeight={500}>
-                            Welcome, {name} !
-                        </Typography>
-                        <Divider/>
-                        <RecentPoWithSpinner isLoading={loading}/>
-                    </Stack>
-                </Container>
-            </HeaderComponent>
-        )
-    }
+    return (
+        <HeaderComponent title="Dashboard">
+            <Container>
+                <Stack spacing={2}>
+                    <Typography variant="h3"
+                                component="h3"
+                                fontSize={35}
+                                fontWeight={500}>
+                        Welcome, {name} !
+                    </Typography>
+                    <Divider/>
+                    <RecentPoWithSpinner isLoading={loading}/>
+                </Stack>
+            </Container>
+        </HeaderComponent>
+    )
 }
 
 const mapStateToProps = (state) => ({
@@ -62,7 +53,8 @@ const mapStateToProps = (state) => ({
 })
 
 const mapDispatchToProps = dispatch => ({
-    setRecentPo: docList => dispatch(setRecentPo(docList))
+    setRecentPo: docList => dispatch(setRecentPo(docList)),
+    showMessage: message => dispatch(showMessage(message))
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(DashboardPage)

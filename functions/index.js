@@ -1,5 +1,6 @@
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
+const axios = require("axios")
 const {
     AlignmentType,
     Document,
@@ -22,6 +23,13 @@ const app = admin.initializeApp({
 const bucket = admin.storage().bucket();
 const auth = admin.auth(app);
 const db = admin.firestore(app)
+
+const razorPayAuth = {
+    username: "rzp_test_aK2KAFwspim1Ha",
+    password: "9glQAcfPqMUKVE3wtfZpfKdD"
+}
+
+/////////////////////////// Callable Functions ///////////////////////////////////
 
 exports.docxPo = functions
     .region("asia-south1")
@@ -180,18 +188,6 @@ exports.docxPo = functions
 
     })
 
-exports.deletePoDownloads = functions
-    .runWith({
-        timeoutSeconds: 60,
-        memory: "128MB"
-    })
-    .region("asia-south1")
-    .pubsub.schedule("00 12 * * 7")
-    .timeZone("Asia/Kolkata")
-    .onRun(async () => {
-        await bucket.deleteFiles({prefix: "po-downloads/"})
-    })
-
 exports.createUserWithPhone = functions
     .runWith({
         timeoutSeconds: 30,
@@ -213,3 +209,186 @@ exports.createUserWithPhone = functions
                 })
         }
     })
+
+exports.payUsers = functions
+    .runWith({
+        timeoutSeconds: 60,
+        memory: "128MB"
+    })
+    .region("asia-south1")
+    .https.onCall((d, context) => {
+        const {id} = d
+
+        if (context.auth) {
+            return db.collection("users").doc(id).get()
+                .then(r => {
+                    const data = r.data()
+
+                    const configData = JSON.stringify({
+                        "account_number": "2323230065575310",
+                        "fund_account_id": data.razorpayFund,
+                        "amount": parseInt(data.salary) * 100,
+                        "currency": "INR",
+                        "mode": "IMPS",
+                        "purpose": "salary",
+                        "queue_if_low_balance": true,
+                        "narration": `Salary of ${data.name}`,
+                        "notes": {
+                            "uid": id,
+                            "name": data.name
+                        }
+                    })
+
+                    const config = {
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        auth: razorPayAuth,
+                    }
+
+                    return axios.post("https://api.razorpay.com/v1/payouts", configData, config)
+                })
+                .then((r) => {
+                    return {status: r.data}
+                })
+                .catch(e => {
+                    return {status: e.message}
+                })
+        }
+    })
+
+///////////////////////////// Scheduled Functions //////////////////////////////////
+
+exports.deletePoDownloads = functions
+    .runWith({
+        timeoutSeconds: 60,
+        memory: "128MB"
+    })
+    .region("asia-south1")
+    .pubsub.schedule("00 12 * * 7")
+    .timeZone("Asia/Kolkata")
+    .onRun(async () => {
+        await bucket.deleteFiles({prefix: "po-downloads/"})
+    })
+
+////////////////////////////// Background Functions //////////////////////////////////
+
+exports.rezorpayAccountCreator = functions
+    .runWith({
+        timeoutSeconds: 60,
+        memory: "128MB"
+    })
+    .region("asia-south1")
+    .firestore.document("users/{uid}")
+    .onCreate((doc, context) => {
+        const data = doc.data()
+        let razorpayContact = ""
+
+        const config = {
+            method: "post",
+            url: "https://api.razorpay.com/v1/contacts",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            auth: razorPayAuth,
+            data: {
+                "name": data.name,
+                "contact": data.phoneNumber,
+                "type": "employee",
+                "reference_id": doc.id,
+            }
+        }
+
+        return axios.request(config)
+            .then((r) => {
+                razorpayContact = r.data.id
+                const configFund = {
+                    method: "post",
+                    url: "https://api.razorpay.com/v1/fund_accounts",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    auth: razorPayAuth,
+                    data: {
+                        "contact_id": r.data.id,
+                        "account_type": "bank_account",
+                        "bank_account": {
+                            "name": data.name,
+                            "ifsc": data.ifscCode,
+                            "account_number": data.bankAccountNumber
+                        }
+                    }
+                }
+
+                return axios.request(configFund)
+            })
+            .then((r) => {
+                const userRef = db.collection('users').doc(doc.id)
+
+                return userRef.set({razorpayContact: razorpayContact, razorpayFund: r.data.id}, {merge: true})
+            })
+            .catch(e => {
+                return {error: e.message}
+            })
+    })
+
+exports.rezorpayAccountDeactivator = functions
+    .runWith({
+        timeoutSeconds: 60,
+        memory: "128MB"
+    })
+    .region("asia-south1")
+    .firestore.document("users/{uid}")
+    .onDelete((doc, context) => {
+        const deletedValue = doc.data();
+
+        try {
+            const config = {
+                method: "patch",
+                url: `https://api.razorpay.com/v1/contacts/${deletedValue.razorpayContact}`,
+                auth: razorPayAuth,
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                data: {
+                    "active": false
+                }
+            }
+            return axios.request(config)
+        } catch (e) {
+            return {"error": e.message}
+        }
+
+    })
+
+/////////////////////////////// HTTP Functions ///////////////////////////////////////
+
+const express = require('express')
+
+const hooksExpressApp = express()
+
+hooksExpressApp.post("/", async (req, res) => {
+    try {
+        const data = req.body.payload.payout.entity
+
+        switch (req.body.event){
+            case "payout.processed":
+                await db.collection("users").doc(data.notes.uid).set({
+                    lastPayed : data.utr
+                }, {merge:true})
+                break
+            default:
+                break
+        }
+
+        await db.collection("paymentHistory").doc(data.utr).set(data)
+
+        res.send({status: "ok"})
+    } catch (e) {
+        res.send({status: "error"})
+    }
+})
+
+exports.razorPayWebhooks = functions
+    .region("asia-south1")
+    .https.onRequest(hooksExpressApp)

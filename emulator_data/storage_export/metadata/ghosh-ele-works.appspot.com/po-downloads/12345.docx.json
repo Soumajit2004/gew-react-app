@@ -1,0 +1,19 @@
+{
+  "name": "po-downloads/12345.docx",
+  "bucket": "ghosh-ele-works.appspot.com",
+  "contentType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  "metageneration": 1,
+  "generation": 1644980283176,
+  "storageClass": "STANDARD",
+  "etag": "someETag",
+  "contentDisposition": "inline",
+  "contentEncoding": "identity",
+  "downloadTokens": [
+    "e2923d02-32f6-4741-baed-307ebb078c79"
+  ],
+  "timeCreated": "2022-02-16T02:58:03.175Z",
+  "updated": "2022-02-16T02:58:03.176Z",
+  "size": 6278,
+  "md5Hash": "RSQSuhGHtl/eK2jqAakNZA==",
+  "crc32c": "1390179365"
+}

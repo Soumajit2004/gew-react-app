@@ -1,0 +1,196 @@
+import {
+    Box,
+    Button, Dialog, DialogActions,
+    DialogContent, DialogContentText,
+    DialogTitle,
+    InputAdornment,
+    Stack,
+    TextField,
+    Typography
+} from "@mui/material";
+import Divider from "@mui/material/Divider";
+import React, {useState} from "react";
+import {
+    RecaptchaVerifier,
+    signInWithEmailAndPassword,
+    signInWithPhoneNumber
+} from "firebase/auth";
+import {auth, db} from "../../firebase/firebase.utils";
+import isEmail from "validator/es/lib/isEmail";
+import isMobilePhone from "validator/es/lib/isMobilePhone";
+import {collection, getDocs, query, where} from "firebase/firestore";
+import {showMessage} from "../../redux/snackbar/snackbar.actions";
+import {connect} from "react-redux";
+
+const SignInForm = ({showMessage}) => {
+
+    const [isDialogOpen, setDialogOpen] = useState(false)
+
+    const [otp, setOTP] = useState("")
+
+    const [isRecaptchaReady, setRecaptchaReady] = useState(false)
+
+    const recaptchaVerifier = () => {
+        if (!isRecaptchaReady) {
+            window.recaptchaVerifier = new RecaptchaVerifier('recaptcha-container', {
+                'size': 'invisible',
+            }, auth)
+            setRecaptchaReady(true)
+        }
+    }
+
+    const confirmOtp = () => {
+        try {
+            window.otpVerifier.confirm(otp)
+            setDialogOpen(false)
+        } catch (e) {
+            showMessage(e.message)
+        }
+    }
+
+    const handleSubmit = async (event) => {
+        event.preventDefault()
+
+        try{
+            const data = new FormData(event.currentTarget)
+            const email = data.get("email"), password = data.get("password"), phoneNumber = data.get("phoneNumber")
+
+            if (isEmail(email) && password) {
+                try{
+                    await signInWithEmailAndPassword(auth, email, password)
+                }catch (e) {
+                    showMessage(e.toString())
+                }
+            } else if (isMobilePhone(phoneNumber)) {
+                try {
+                    const response = await getDocs(query(collection(db, "users"), where("phoneNumber", "==", `+91${phoneNumber}`)))
+
+                    const user = response.docs[0].data() | ""
+
+                    if (user.phoneNumber === `+91${phoneNumber}` && user.authMethod === `phone`) {
+                        recaptchaVerifier()
+                        const appVerifier = window.recaptchaVerifier;
+
+                        try {
+                            window.otpVerifier = await signInWithPhoneNumber(auth, `+91${phoneNumber}`, appVerifier)
+
+                            setDialogOpen(true)
+                        } catch (e) {
+                            showMessage(e.message)
+                        }
+                    }
+
+                } catch (e) {
+                    showMessage("Phone No Not Registered !")
+                }
+            } else {
+                showMessage("Invalid Details !")
+            }
+        }catch (e) {
+
+        }
+    };
+
+    return (
+        <Box
+            sx={{
+                my: 8,
+                mx: 4,
+                display: 'flex',
+                alignSelf: "center",
+                flexDirection: 'column',
+                alignItems: 'center',
+            }}
+            component="form"
+            onSubmit={handleSubmit}
+        >
+            <div id='recaptcha-container'/>
+
+            <Dialog open={isDialogOpen}
+                    disableEscapeKeyDown={true}
+                    onClose={()=>{setDialogOpen(false)}}>
+                <DialogTitle>Enter OTP</DialogTitle>
+                <DialogContent>
+                    <DialogContentText>
+                        {`An OTP has been send to your registered phone no`}
+                    </DialogContentText>
+                    <TextField
+                        autoFocus
+                        margin="dense"
+                        id="otp"
+                        label="OTP"
+                        fullWidth
+                        variant="standard"
+                        onChange={(e) => {setOTP(e.target.value)}}
+                    />
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={()=>{setDialogOpen(false)}}>Cancel</Button>
+                    <Button onClick={confirmOtp}>Login</Button>
+                </DialogActions>
+            </Dialog>
+
+            <Typography component="h2" variant="h2" fontWeight={600}>
+                Sign in
+            </Typography>
+            <Stack width="80%" spacing={2}>
+                <Box>
+                    <TextField
+                        margin="normal"
+                        fullWidth
+                        id="email"
+                        label="Email Address"
+                        name="email"
+                        autoFocus
+                        type="email"
+                    />
+                    <TextField
+                        margin="normal"
+                        fullWidth
+                        name="password"
+                        label="Password"
+                        type="password"
+                        id="password"
+                    />
+                </Box>
+                <Divider/>
+                <TextField
+                    margin="normal"
+                    fullWidth
+                    name="phoneNumber"
+                    label="Phone Number"
+                    InputProps={{
+                        startAdornment: <InputAdornment position="start">+91</InputAdornment>,
+                    }}
+                    id="phoneNumber"
+                    type="number"
+                />
+                <Button
+                    type="submit"
+                    fullWidth
+                    variant="contained"
+                    sx={{mt: 3, mb: 2}}
+                >
+                    Sign In
+                </Button>
+                {
+                    window.recaptchaVerifier ? <Button
+                        fullWidth
+                        id="otp-button"
+                        variant="outlined"
+                        sx={{mt: 3, mb: 2}}
+                        onClick={()=>{setDialogOpen(true)}}
+                    >
+                        Enter OTP
+                    </Button> : null
+                }
+            </Stack>
+        </Box>
+    )
+}
+
+const mapDispatchToProp = dispatch => ({
+    showMessage: message => dispatch(showMessage(message))
+})
+
+export default connect(null, mapDispatchToProp)(SignInForm)

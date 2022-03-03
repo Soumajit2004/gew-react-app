@@ -42,6 +42,11 @@ const poReducer = (state = INITIAL_STATE, action) => {
                 ...state,
                 recentPo: action.payload,
             }
+        case PoActionTypes.FETCH_RECENT_PO:
+            return {
+                ...state,
+                recentPo: action.payload,
+            }
         default:
             return state
     }

@@ -1,14 +1,15 @@
 import React from "react";
 import {CircularProgress} from "@mui/material";
 
-const LoadingSpinner = ({isLoading, children}) => {
+const LoadingSpinner = () => {
     return <div
         style={{
             width: "100%",
+            height:"80%",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            padding: "50px 0px"
+            paddingTop:"20px"
         }}>
         <CircularProgress color="primary"/>
     </div>

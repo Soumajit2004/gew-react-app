@@ -12,7 +12,7 @@ import {store, persistor} from "./redux/store"
 
 const theme = createTheme({
     palette: {
-        type: 'light',
+        type: "light",
         primary: {
             main: '#311b92',
         },
@@ -57,15 +57,15 @@ const theme = createTheme({
 });
 
 ReactDOM.render(
-        <Provider store={store}>
-            <ThemeProvider theme={theme}>
-                <BrowserRouter>
-                    <PersistGate persistor={persistor}>
-                        <App/>
-                    </PersistGate>
-                </BrowserRouter>
-            </ThemeProvider>
-        </Provider>,
+    <Provider store={store}>
+        <ThemeProvider theme={theme}>
+            <BrowserRouter>
+                <PersistGate persistor={persistor}>
+                    <App/>
+                </PersistGate>
+            </BrowserRouter>
+        </ThemeProvider>
+    </Provider>,
     document.getElementById('root')
 );
 

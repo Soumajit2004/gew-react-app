@@ -18,6 +18,9 @@ import ListItemText from '@mui/material/ListItemText';
 import {AppRegistration, Dashboard, Logout, Pages, Payment} from "@mui/icons-material";
 import {withRouter} from "react-router";
 import {auth} from "../../firebase/firebase.utils";
+import {Fade} from "@mui/material";
+import {connect} from "react-redux";
+import {selectCurrentUser} from "../../redux/user/user.selector";
 
 const drawerWidth = 240;
 
@@ -65,7 +68,7 @@ const DrawerHeader = styled('div')(({theme}) => ({
     justifyContent: 'flex-end',
 }));
 
-function HeaderComponent({title, children, history}) {
+function HeaderComponent({title, children, history, currentUser}) {
     const theme = useTheme();
     const [open, setOpen] = React.useState(false);
 
@@ -84,89 +87,103 @@ function HeaderComponent({title, children, history}) {
     }
 
     return (
-        <Box sx={{display: 'flex'}}>
-            <CssBaseline/>
-            <AppBar position="fixed" open={open}>
-                <Toolbar>
-                    <IconButton
-                        color="inherit"
-                        aria-label="open drawer"
-                        onClick={handleDrawerOpen}
-                        edge="start"
-                        sx={{mr: 2, ...(open && {display: 'none'})}}
-                    >
-                        <MenuIcon/>
-                    </IconButton>
-                    <Typography variant="h6" noWrap component="div">
-                        {title}
-                    </Typography>
-                </Toolbar>
-            </AppBar>
-            <Drawer
-                sx={{
-                    width: drawerWidth,
-                    flexShrink: 0,
-                    '& .MuiDrawer-paper': {
+        <Fade in>
+            <Box sx={{display: 'flex'}}>
+                <CssBaseline/>
+                <AppBar position="fixed" open={open}>
+                    <Toolbar>
+                        <IconButton
+                            color="inherit"
+                            aria-label="open drawer"
+                            onClick={handleDrawerOpen}
+                            edge="start"
+                            sx={{mr: 2, ...(open && {display: 'none'})}}
+                        >
+                            <MenuIcon/>
+                        </IconButton>
+                        <Typography variant="h6" noWrap component="div">
+                            {title}
+                        </Typography>
+                    </Toolbar>
+                </AppBar>
+                <Drawer
+                    sx={{
                         width: drawerWidth,
-                        boxSizing: 'border-box',
-                    },
-                }}
-                variant="persistent"
-                anchor="left"
-                open={open}
-            >
-                <DrawerHeader >
-                    <IconButton onClick={handleDrawerClose}>
-                        {theme.direction === 'ltr' ? <ChevronLeftIcon/> : <ChevronRightIcon/>}
-                    </IconButton>
-                </DrawerHeader>
-                <Divider/>
-                <List>
-                    <ListItem button key={1} onClick={() => redirectTo("/dashboard")}>
-                        <ListItemIcon>
-                            <Dashboard/>
-                        </ListItemIcon>
-                        <ListItemText primary="Dashboard"/>
-                    </ListItem>
-                    <ListItem button key={2} onClick={() => redirectTo("/po-manager")}>
-                        <ListItemIcon>
-                            <Pages/>
-                        </ListItemIcon>
-                        <ListItemText primary="P.O Manager"/>
-                    </ListItem>
-                    <ListItem button key={3}>
-                        <ListItemIcon>
-                            <Payment/>
-                        </ListItemIcon>
-                        <ListItemText primary="Payouts"/>
-                    </ListItem>
-                </List>
-                <Divider/>
-                <List>
-                    <ListItem button key={4}onClick={() => redirectTo("/register")}>
-                        <ListItemIcon>
-                            <AppRegistration/>
-                        </ListItemIcon>
-                        <ListItemText primary="Register"/>
-                    </ListItem>
-                    <ListItem button key={5} onClick={() => {
-                        auth.signOut()
-                            .then(() => redirectTo("/sign-in"))
-                    }}>
-                        <ListItemIcon>
-                            <Logout/>
-                        </ListItemIcon>
-                        <ListItemText primary="Logout"/>
-                    </ListItem>
-                </List>
-            </Drawer>
-            <Main open={open}>
-                <DrawerHeader/>
-                {children}
-            </Main>
-        </Box>
+                        flexShrink: 0,
+                        '& .MuiDrawer-paper': {
+                            width: drawerWidth,
+                            boxSizing: 'border-box',
+                        },
+                    }}
+                    variant="persistent"
+                    anchor="left"
+                    open={open}
+                >
+                    <DrawerHeader>
+                        <IconButton onClick={handleDrawerClose}>
+                            {theme.direction === 'ltr' ? <ChevronLeftIcon/> : <ChevronRightIcon/>}
+                        </IconButton>
+                    </DrawerHeader>
+                    <Divider/>
+                    <List>
+                        <ListItem button key={1} onClick={() => redirectTo("/dashboard")}>
+                            <ListItemIcon>
+                                <Dashboard/>
+                            </ListItemIcon>
+                            <ListItemText primary="Dashboard"/>
+                        </ListItem>
+                        <ListItem button key={2} onClick={() => redirectTo("/po-manager")}>
+                            <ListItemIcon>
+                                <Pages/>
+                            </ListItemIcon>
+                            <ListItemText primary="P.O Manager"/>
+                        </ListItem>
+                        {
+                            (currentUser.role === "owner") ? (
+                                <ListItem button key={3} onClick={() => {
+                                    redirectTo("/payouts")
+                                }}>
+                                    <ListItemIcon>
+                                        <Payment/>
+                                    </ListItemIcon>
+                                    <ListItemText primary="Payouts"/>
+                                </ListItem>
+                            ) : <div/>
+                        }
+                    </List>
+                    <Divider/>
+                    <List>
+                        <ListItem button key={4} onClick={() => redirectTo("/register")}>
+                            <ListItemIcon>
+                                <AppRegistration/>
+                            </ListItemIcon>
+                            <ListItemText primary="Register"/>
+                        </ListItem>
+                    </List>
+                    <Divider/>
+                    <List>
+                        <ListItem button key={5} onClick={() => {
+                            auth.signOut()
+                                .then(() => redirectTo("/sign-in"))
+                        }}>
+                            <ListItemIcon>
+                                <Logout/>
+                            </ListItemIcon>
+                            <ListItemText primary="Logout"/>
+                        </ListItem>
+                    </List>
+                </Drawer>
+                <Main open={open}>
+                    <DrawerHeader/>
+                    {children}
+                </Main>
+            </Box>
+        </Fade>
     );
 }
 
+const mapStateToProps = (state) => ({
+    currentUser: selectCurrentUser(state),
+})
 
-export default withRouter(HeaderComponent)
+export default connect(mapStateToProps, null)(withRouter(HeaderComponent))
