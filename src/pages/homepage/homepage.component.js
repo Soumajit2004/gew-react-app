@@ -1,7 +1,6 @@
 import React from "react";
 import "./homepage.styles.scss";
 import {Button, Container,Stack, Typography} from "@mui/material";
-import Box from "@mui/material/Box";
 
 const HomePage = () => (
     <div className="home-page">
@@ -21,9 +20,10 @@ const HomePage = () => (
                     <Typography variant="h1" component="h1" fontSize={80} fontWeight={600} color="white">
                         Ghosh Electrical Works
                     </Typography>
-                    <Box>
+                    <Stack spacing={2} direction="row">
                         <Button variant="contained" href="/sign-in">Dashboard</Button>
-                    </Box>
+                        <Button variant="contained" color="secondary" href="https://rzp.io/l/UvqW9u0">Pay Here</Button>
+                    </Stack>
                 </Stack>
             }/>
     </div>

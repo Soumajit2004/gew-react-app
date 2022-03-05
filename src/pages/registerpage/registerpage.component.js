@@ -90,7 +90,6 @@ const RegisterPage = ({showMessage}) => {
                         showMessage("Failed to create user !")
                     }
                 }
-                window.location.reload()
             }
             setLoading(false)
         }
@@ -230,7 +229,7 @@ const RegisterPage = ({showMessage}) => {
                                                                        variant="filled"
                                                                        name="accNoC"
                                                                        required
-                                                                       type="password"
+                                                                       type="number"
                                                                        fullWidth/>
                                                             <TextField label="IFSC Code"
                                                                        variant="filled"
@@ -246,9 +245,7 @@ const RegisterPage = ({showMessage}) => {
                                                     <Button variant="contained" type="submit"
                                                             style={{padding: "10px 20px"}}>Register</Button>
                                                     <Button variant="outlined" style={{padding: "10px 20px"}}
-                                                            onClick={() => {
-                                                                window.location.reload()
-                                                            }}>Clear</Button>
+                                                            onClick={()=>window.location.reload()}>Clear</Button>
                                                 </Box>
                                             </Grid>
                                         </Grid>

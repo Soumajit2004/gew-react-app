@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react";
-import {collection, doc, getDocs, orderBy, query, updateDoc} from "firebase/firestore";
+import {collection, doc, getDoc, getDocs, orderBy, query, updateDoc} from "firebase/firestore";
 import {db, payUserFnc} from "../../firebase/firebase.utils";
 import {DataGrid, GridColDef} from "@mui/x-data-grid";
 import LoadingSpinner from "../withSpinner/isLoadingSpinner";
@@ -26,14 +26,14 @@ const PayoutMain = ({showMessage}) => {
     const [selections, setSelections] = useState([])
     const [isLoading, setLoading] = useState(true)
     const [confDialog, setConfDialog] = useState(false)
-
     const columns: GridColDef[] = [
-        {field: 'name', headerName: 'Name', width: 350},
-        {field: 'bankAccountNumber', headerName: 'Account No', width: 350},
-        {field: 'salary', headerName: 'Salary', width: 200},
+        {field: 'name', headerName: 'Name', width: 250},
+        {field: 'bankAccountNumber', headerName: 'Account No', width: 250},
+        {field: 'salary', headerName: 'Salary', width: 150},
+        {field: 'lastPayedDate', headerName: 'Last Payed On', width: 320},
         {
-            field: "edit", headerName: 'Edit', width: 100, align:"center",
-            headerAlign:"center", hideable: false, sortable:false, filterable: false,
+            field: "edit", headerName: 'Edit Salary', width: 100, align: "center",
+            headerAlign: "center", hideable: false, sortable: false, filterable: false,
             renderCell: (cellValues) => {
                 return (
                     <IconButton color="primary"
@@ -76,18 +76,25 @@ const PayoutMain = ({showMessage}) => {
             const userQuery = await getDocs(query(collection(db, "users"), orderBy("name", "desc")));
 
             const filteredRows = []
-            userQuery.docs.forEach((elem) => {
+            for (const elem of userQuery.docs) {
                 const data = elem.data()
 
                 if (data.role !== "owner") {
-                    filteredRows.push({id: elem.id, ...data})
+                    let lastPayedDate = ""
+                    if (data.lastPayed) {
+                        const paymentData = (await getDoc(doc(db, "paymentHistory", data.lastPayed))).data()
+                        console.log(paymentData.created_at)
+                        lastPayedDate = new Date(parseInt(paymentData.created_at) * 1000)
+                    }
+
+                    filteredRows.push({id: elem.id, lastPayedDate: lastPayedDate.toString(), ...data})
                 }
-            })
+            }
 
             setRows(filteredRows)
             setLoading(false)
         } catch (e) {
-            showMessage(e.message)
+            showMessage(e)
         }
     }
 
@@ -98,8 +105,8 @@ const PayoutMain = ({showMessage}) => {
                     showMessage(`Paying...`)
                     await payUserFnc({id: e.toString()})
                     showMessage(`Payed successfully`)
-                } catch (e) {
-                    showMessage(e.toString())
+                } catch (er) {
+                    showMessage(er.message)
                 }
             }
         }
@@ -107,12 +114,20 @@ const PayoutMain = ({showMessage}) => {
 
     const PaymentConformationDialog = () => {
         let totalAmount = 0
+        let recentlyPaidNames = []
         if (confDialog) {
             for (let e in selections) {
                 for (let i in rows) {
                     i = rows[i]
                     if (i.id === selections[e]) {
                         totalAmount += parseInt(i.salary)
+
+                        if (i.lastPayedDate) {
+                            let diff = Math.abs(new Date() - new Date(i.lastPayedDate))
+                            diff = diff / (1000 * 3600 * 24)
+
+                            diff < 28 ? recentlyPaidNames.push(i.name) : console.log("ok")
+                        }
                     }
                 }
             }
@@ -131,7 +146,8 @@ const PayoutMain = ({showMessage}) => {
             </DialogTitle>
             <DialogContent>
                 <DialogContentText id="alert-dialog-description">
-                    {`${selections.length} users selected, total payable amount ₹${totalAmount}`}
+                    {`${selections.length} users selected, total payable amount ₹${totalAmount}. \n
+                    ${recentlyPaidNames.length > 0 ? `${recentlyPaidNames.toString()} was paid less than 28 days ago. Do you want to pay them again?` : "."}`}
                 </DialogContentText>
             </DialogContent>
             <DialogActions>

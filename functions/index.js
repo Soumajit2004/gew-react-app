@@ -363,28 +363,36 @@ exports.rezorpayAccountDeactivator = functions
 
 /////////////////////////////// HTTP Functions ///////////////////////////////////////
 
+const razorPayWebhookSecret = "i_am_2_Webhook"
+const crypto = require('crypto')
 const express = require('express')
-
 const hooksExpressApp = express()
 
 hooksExpressApp.post("/", async (req, res) => {
-    try {
-        const data = req.body.payload.payout.entity
 
-        switch (req.body.event){
-            case "payout.processed":
-                await db.collection("users").doc(data.notes.uid).set({
-                    lastPayed : data.utr
-                }, {merge:true})
-                break
-            default:
-                break
+    const shaSum = crypto.createHmac('sha256', razorPayWebhookSecret)
+    shaSum.update(JSON.stringify(req.body))
+    const digest = shaSum.digest('hex')
+
+    if (digest === req.headers['x-razorpay-signature']) {
+        try {
+            const data = req.body.payload.payout.entity
+
+            switch (req.body.event) {
+                case "payout.processed":
+                    await db.collection("users").doc(data.notes.uid).set({
+                        lastPayed: data.utr
+                    }, {merge: true})
+                default:
+                    await db.collection("paymentHistory").doc(data.utr).set(data)
+                    break
+            }
+
+            res.send({status: "ok"})
+        } catch (e) {
+            res.send({status: "error"})
         }
-
-        await db.collection("paymentHistory").doc(data.utr).set(data)
-
-        res.send({status: "ok"})
-    } catch (e) {
+    }else {
         res.send({status: "error"})
     }
 })
