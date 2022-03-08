@@ -43,13 +43,21 @@ class App extends React.Component {
         this.unsubscribeFromAuth()
     }
 
+    getUserRole() {
+        const {currentUser} = this.props
+        try{
+            return currentUser.role
+        }catch (e) {
+            return ""
+        }
+    }
+
     render() {
         const {currentUser} = this.props
 
         return (
             <div className="App" id="app">
                 <CustomSnackBar/>
-
                 <Switch>
                     <ErrorBoundary>
                         <Suspense fallback={<IsLoadingSpinner/>}>
@@ -61,9 +69,9 @@ class App extends React.Component {
                             <Route exact path="/po-manager"
                                    render={() => currentUser ? (<PoPage/>) : (<Redirect to="/sign-in"/>)}/>
                             <Route exact path="/register"
-                                   render={() => currentUser.role !== "field" ? (<RegisterPage/>) : (<Redirect to="/sign-in"/>)}/>
+                                   render={() => (this.getUserRole() !== "field") ? (<RegisterPage/>) : (<Redirect to="/dashboard"/>)}/>
                             <Route exact path="/payouts"
-                                   render={() => currentUser.role === "owner" ? (<PayoutPage/>) : (<Redirect to="/dashboard"/>)}/>
+                                   render={() => (this.getUserRole() === "owner") ? (<PayoutPage/>) : (<Redirect to="/dashboard"/>)}/>
                         </Suspense>
                     </ErrorBoundary>
                 </Switch>

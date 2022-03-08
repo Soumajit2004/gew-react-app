@@ -31,6 +31,7 @@ import {connect} from "react-redux";
 import {db, doxPoFirebaseFnc, storage} from "../../firebase/firebase.utils";
 import {selectPoData, selectPoSearch} from "../../redux/po/po.selectors.";
 import {deletePo, downloadPo, fetchPo, setAddMode, setEditMode, setSearchText} from "../../redux/po/po.actions.";
+import LoadingSpinner from "../withSpinner/isLoadingSpinner";
 
 const columns = [
     {field: 'id', headerName: 'ID', width: 50},
@@ -55,7 +56,8 @@ const PoViewBody = ({
                         setEditMode,
                         fetchPo,
                         downloadPo,
-                        deletePo
+                        deletePo,
+                        isFetching
                     }) => {
     const rows = []
     let counter = 0
@@ -92,54 +94,54 @@ const PoViewBody = ({
         })
     }
 
-    return (
-        <Stack spacing={2}>
-            <Fade in>
-                <Stack direction="row" spacing={2}>
+    return <Stack spacing={2}>
+        <Fade in>
+            <Stack direction="row" spacing={2}>
 
-                    <Dialog
-                        open={detailsOpen}
-                        onClose={handleDetailsClose}
-                    >
-                        <DialogTitle>
-                            Other Details
-                        </DialogTitle>
-                        <DialogContent>
-                            <DialogContentText id="alert-dialog-description">
-                                <Typography>{`Last modified by : ${lastEditedBy}`}</Typography>
-                                <Typography>{`Last modified on : ${parseDate({date: lastEditedTime})}`}</Typography>
-                            </DialogContentText>
-                        </DialogContent>
-                        <DialogActions>
-                            <Button onClick={handleDetailsClose} autoFocus>
-                                Okay
-                            </Button>
-                        </DialogActions>
-                    </Dialog>
-                    <TextField
-                        hiddenLabel
-                        id="filled-hidden-label-normal"
-                        placeholder="Search P.O"
-                        value={searchText}
-                        variant="filled"
-                        fullWidth={true}
-                        onChange={(e) => {
-                            setSearchText(e.target.value)
-                        }}
-                    />
-                    <Button variant="contained" onClick={fetchPo}>
-                        <Search/>
-                    </Button>
-                    <Button variant="contained" onClick={() => {
-                        setAddMode(true)
-                    }}>
-                        <Add/>
-                    </Button>
-                </Stack>
-            </Fade>
-            <Divider/>
-            <Grow in>
-                <Paper elevation={6} style={{overflowY: "scroll"}}>
+                <Dialog
+                    open={detailsOpen}
+                    onClose={handleDetailsClose}
+                >
+                    <DialogTitle>
+                        Other Details
+                    </DialogTitle>
+                    <DialogContent>
+                        <DialogContentText id="alert-dialog-description">
+                            <Typography>{`Last modified by : ${lastEditedBy}`}</Typography>
+                            <Typography>{`Last modified on : ${parseDate({date: lastEditedTime})}`}</Typography>
+                        </DialogContentText>
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={handleDetailsClose} autoFocus>
+                            Okay
+                        </Button>
+                    </DialogActions>
+                </Dialog>
+                <TextField
+                    hiddenLabel
+                    id="filled-hidden-label-normal"
+                    placeholder="Search P.O"
+                    value={searchText}
+                    variant="filled"
+                    fullWidth={true}
+                    onChange={(e) => {
+                        setSearchText(e.target.value)
+                    }}
+                />
+                <Button variant="contained" onClick={fetchPo}>
+                    <Search/>
+                </Button>
+                <Button variant="contained" onClick={() => {
+                    setAddMode(true)
+                }}>
+                    <Add/>
+                </Button>
+            </Stack>
+        </Fade>
+        <Divider/>
+        <Grow in>
+            {
+                isFetching ? <LoadingSpinner/> : <Paper elevation={6} style={{overflowY: "scroll"}}>
                     <Box>
                         <Stack spacing={0}>
                             <Stack direction="row"
@@ -263,11 +265,9 @@ const PoViewBody = ({
                         </Stack>
                     </Box>
                 </Paper>
-            </Grow>
-        </Stack>
-
-
-    )
+            }
+        </Grow>
+    </Stack>
 }
 
 const mapStateToProps = (state) => ({
