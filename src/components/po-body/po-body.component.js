@@ -28,9 +28,9 @@ import {
 import {DataGrid} from "@mui/x-data-grid";
 import {downloadFromUrl, parseDate} from "../../utilils/functions.utilis";
 import {connect} from "react-redux";
-import {setSearchText, toggleAddMode, toggleEditMode, toggleViewMode} from "../../redux/po/po.actions.";
 import {db, doxPoFirebaseFnc, storage} from "../../firebase/firebase.utils";
 import {selectPoData, selectPoSearch} from "../../redux/po/po.selectors.";
+import {deletePo, downloadPo, fetchPo, setAddMode, setEditMode, setSearchText} from "../../redux/po/po.actions.";
 
 const columns = [
     {field: 'id', headerName: 'ID', width: 50},
@@ -52,10 +52,10 @@ const PoViewBody = ({
                         },
                         searchText,
                         setSearchText,
-                        handleSearch,
-                        toggleEditMode,
-                        toggleAddMode,
-                        toggleViewMode,
+                        setEditMode,
+                        fetchPo,
+                        downloadPo,
+                        deletePo
                     }) => {
     const rows = []
     let counter = 0
@@ -93,7 +93,6 @@ const PoViewBody = ({
     }
 
     return (
-
         <Stack spacing={2}>
             <Fade in>
                 <Stack direction="row" spacing={2}>
@@ -117,7 +116,6 @@ const PoViewBody = ({
                             </Button>
                         </DialogActions>
                     </Dialog>
-
                     <TextField
                         hiddenLabel
                         id="filled-hidden-label-normal"
@@ -129,10 +127,12 @@ const PoViewBody = ({
                             setSearchText(e.target.value)
                         }}
                     />
-                    <Button variant="contained" onClick={handleSearch}>
+                    <Button variant="contained" onClick={fetchPo}>
                         <Search/>
                     </Button>
-                    <Button variant="contained" onClick={toggleAddMode}>
+                    <Button variant="contained" onClick={() => {
+                        setAddMode(true)
+                    }}>
                         <Add/>
                     </Button>
                 </Stack>
@@ -152,7 +152,7 @@ const PoViewBody = ({
                                 <div style={{display: "flex", alignItems: "center", gap: "20px"}}>
                                     <Button variant="contained" startIcon={<Edit/>} style={{height: 40}}
                                             onClick={() => {
-                                                toggleEditMode()
+                                                setEditMode(true)
                                             }}>
                                         Edit
                                     </Button>
@@ -173,33 +173,13 @@ const PoViewBody = ({
                                             onClose={handleMenuClose}
                                         >
                                             <MenuItem
-                                                onClick={
-                                                    () => {
-                                                        handleMenuClose()
-                                                        deleteDoc(doc(db, "po", poNumber))
-                                                            .then(r => {
-                                                                toggleViewMode()
-                                                            })
+                                                onClick={async () => {
+                                                    handleMenuClose()
+                                                    deletePo()
+                                                }}>Delete</MenuItem>
 
-                                                    }}>Delete</MenuItem>
-
-                                            <MenuItem onClick={async () => {
-                                                const poDocRef = ref(storage, `po-downloads/${poNumber}.docx`)
-                                                let url = null
-
-                                                try {
-                                                    url = await getDownloadURL(poDocRef)
-                                                    downloadFromUrl(url)
-                                                }catch (e) {
-                                                    doxPoFirebaseFnc({id: poNumber})
-                                                        .then(async r => {
-                                                            console.log(r.data)
-                                                            setTimeout(async () => {
-                                                                url = await getDownloadURL(poDocRef)
-                                                                downloadFromUrl(url)
-                                                            }, 10000)
-                                                        })
-                                                }
+                                            <MenuItem onClick={() => {
+                                                downloadPo()
                                                 handleMenuClose()
                                             }}>
                                                 Download
@@ -288,8 +268,6 @@ const PoViewBody = ({
 
 
     )
-        ;
-
 }
 
 const mapStateToProps = (state) => ({
@@ -297,11 +275,13 @@ const mapStateToProps = (state) => ({
     searchText: selectPoSearch(state),
 })
 
-const mapDispatchToProp = dispatch => ({
+const mapDispatchToProps = dispatch => ({
+    fetchPo: () => dispatch(fetchPo()),
+    downloadPo: () => dispatch(downloadPo()),
+    deletePo: () => dispatch(deletePo()),
     setSearchText: text => dispatch(setSearchText(text)),
-    toggleEditMode: () => dispatch(toggleEditMode()),
-    toggleAddMode: () => dispatch(toggleAddMode()),
-    toggleViewMode: () => dispatch(toggleViewMode())
+    setEditMode: bool => dispatch(setEditMode(bool)),
+    setAddMode: bool => dispatch(setAddMode(bool))
 })
 
-export default connect(mapStateToProps, mapDispatchToProp)(PoViewBody)
+export default connect(mapStateToProps, mapDispatchToProps)(PoViewBody)

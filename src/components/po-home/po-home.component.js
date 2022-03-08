@@ -1,10 +1,10 @@
 import {Button, Grow, Stack, TextField, Typography} from "@mui/material";
 import {Add, Search} from "@mui/icons-material";
 import React from "react";
-import {setSearchText, toggleAddMode} from "../../redux/po/po.actions.";
+import {fetchPo, setAddMode, setSearchText} from "../../redux/po/po.actions.";
 import {connect} from "react-redux";
 
-const PoHome = ({setSearchText, toggleAddMode, handleSearch}) => {
+const PoHome = ({setSearchText, setAddMode, fetchPo}) => {
 
     return (
         <Grow in>
@@ -21,14 +21,16 @@ const PoHome = ({setSearchText, toggleAddMode, handleSearch}) => {
                     onChange={(e) => setSearchText(e.target.value)}
                 />
                 <Stack spacing={2} direction="row" style={{justifyContent: "center"}}>
-                    <Button variant="contained" onClick={handleSearch} startIcon={<Search/>}
+                    <Button variant="contained" onClick={fetchPo} startIcon={<Search/>}
                             size="large">
                         Search
                     </Button>
                     <Button variant="contained"
                             startIcon={<Add/>}
                             size="large"
-                            onClick={toggleAddMode}>
+                            onClick={() => {
+                                setAddMode(true)
+                            }}>
                         Add
                     </Button>
                 </Stack>
@@ -39,7 +41,8 @@ const PoHome = ({setSearchText, toggleAddMode, handleSearch}) => {
 
 const mapDispatchToProp = dispatch => ({
     setSearchText: text => dispatch(setSearchText(text)),
-    toggleAddMode: () => dispatch(toggleAddMode()),
+    setAddMode: bool => dispatch(setAddMode(bool)),
+    fetchPo: (poNo) => dispatch(fetchPo(poNo))
 })
 
 export default connect(null, mapDispatchToProp)(React.memo(PoHome))

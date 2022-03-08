@@ -7,14 +7,14 @@ export const selectPoData = createSelector(
     po => po.poData
 )
 
-export const selectRecentPo = createSelector(
-    [selectPo],
-    po => po.recentPo
-)
-
 export const selectPoSearch = createSelector(
     [selectPo],
     po => po.searchText
+)
+
+export const selectIsPoFetching = createSelector(
+    [selectPo],
+    po => po.isFetching
 )
 
 export const selectPoView = createSelector(

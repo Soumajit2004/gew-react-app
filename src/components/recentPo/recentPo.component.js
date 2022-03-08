@@ -1,22 +1,20 @@
-import React from "react";
+import React, {useEffect} from "react";
 import {Card, CardContent, Grid, Grow, Stack, Typography} from "@mui/material";
 import Box from "@mui/material/Box";
-import {selectPoView, selectRecentPo} from "../../redux/po/po.selectors.";
 import {connect} from "react-redux";
 import "./recentPo.styles.scss"
 import {parseDate} from "../../utilils/functions.utilis";
 import {withRouter} from "react-router";
-import {setPoData, setSearchText, toggleViewMode} from "../../redux/po/po.actions.";
+import {fetchPo, setSearchText} from "../../redux/po/po.actions.";
+import {selectRecentPo} from "../../redux/recentPo/recentPo.selectors";
+import {fetchRecentPo} from "../../redux/recentPo/recentPo.actions";
 
-const RecentPo = ({recentPo: {docs}, setPoData, toggleViewMode, history, setSearchText, viewMode}) => {
+const RecentPo = ({recentPo: {docs}, fetchRecentPo, setSearchText, fetchPo, history}) => {
 
-    const handleClick = (element) => {
-        setSearchText(element.id)
-        setPoData({poNumber: element.id, ...element.data()})
-        !viewMode ? toggleViewMode() : console.log("HI")
+    useEffect(() => {
+        fetchRecentPo()
+    }, [])
 
-        history.push("/po-manager")
-    }
 
     const getItems = () => {
         try {
@@ -25,7 +23,9 @@ const RecentPo = ({recentPo: {docs}, setPoData, toggleViewMode, history, setSear
                     <Grid key={e.id} item xs={12} lg={3} md={4}>
                         <Grow in>
                             <Card elevation={6} className="r-po-card" onClick={() => {
-                                handleClick(e)
+                                setSearchText(e.id)
+                                fetchPo()
+                                history.push("/po-manager")
                             }}>
                                 <CardContent>
                                     <Typography variant="h5" fontWeight={500} gutterBottom>
@@ -67,13 +67,12 @@ const RecentPo = ({recentPo: {docs}, setPoData, toggleViewMode, history, setSear
 
 const mapStateToProps = (state) => ({
     recentPo: selectRecentPo(state),
-    viewMode: selectPoView(state)
 })
 
 const mapDispatchToProps = dispatch => ({
     setSearchText: text => dispatch(setSearchText(text)),
-    toggleViewMode: () => dispatch(toggleViewMode()),
-    setPoData: data => dispatch(setPoData(data))
+    fetchRecentPo: () => dispatch(fetchRecentPo()),
+    fetchPo: () => dispatch(fetchPo())
 })
 
 export default withRouter(connect(mapStateToProps, mapDispatchToProps)(RecentPo))

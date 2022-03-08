@@ -11,22 +11,25 @@ import {
     Typography
 } from "@mui/material";
 import "./poEditAdd.styles.scss"
-import {Add, CancelOutlined,Delete, Save} from "@mui/icons-material";
+import {Add, CancelOutlined, Delete, Save} from "@mui/icons-material";
 import Box from "@mui/material/Box";
-import {doc, setDoc, Timestamp, updateDoc} from "firebase/firestore";
-import {customGetPoDoc, db} from "../../firebase/firebase.utils";
 import {connect} from "react-redux";
 import {parseDate} from "../../utilils/functions.utilis";
 import {selectCurrentUser} from "../../redux/user/user.selector";
 import {
+    selectIsPoFetching,
     selectPoAdd,
     selectPoData,
     selectPoEdit, selectPoView
 } from "../../redux/po/po.selectors.";
-import {setPoData, toggleAddMode, toggleEditMode, toggleViewMode} from "../../redux/po/po.actions.";
+import {
+    savePo,
+    setAddMode,
+    setEditMode,
+    setViewMode,
+} from "../../redux/po/po.actions.";
 import LoadingSpinner from "../withSpinner/isLoadingSpinner";
 import {showMessage} from "../../redux/snackbar/snackbar.actions";
-
 
 class PoEditAdd extends React.Component {
     constructor(props) {
@@ -34,25 +37,22 @@ class PoEditAdd extends React.Component {
 
         const {editMode, poData: {poNumber, issueNo, poDate, issueDate, description, material}} = this.props
 
-        // converting from firebase format to local format
-        let initMat = []
-        for (let i in material) {
-            initMat.push({matName: i, quantity: material[i][0], unit: material[i][1]})
-        }
-
         this.state = {
-            rows: editMode ? initMat : [{matName: "", quantity: "", unit: ""}],
+            rows: editMode ? this.materialsArrayToObject(material) : [{matName: "", quantity: "", unit: ""}],
             poNumber: editMode ? poNumber : "",
             issueNumber: editMode ? issueNo : "",
             poDate: editMode ? poDate : new Date(),
             issueDate: editMode ? issueDate : new Date(),
             description: editMode ? description : "",
-            isLoading: false
         }
     }
 
-    toggleLoading = () => {
-        this.setState({isLoading: !this.state.isLoading})
+    materialsArrayToObject = (materialList) => {
+        let initMat = []
+        for (let i in materialList) {
+            initMat.push({matName: i, quantity: materialList[i][0], unit: materialList[i][1]})
+        }
+        return initMat
     }
 
     validateFields = () => {
@@ -71,94 +71,30 @@ class PoEditAdd extends React.Component {
         }
     }
 
-    refreshPoDetails = async (poNumber, callback) => {
-        const {setPoData} = this.props
-
-        try {
-            const data = (await customGetPoDoc(poNumber)).data()
-            if (data) {
-                setPoData({poNumber: poNumber, ...data})
-            }
-            callback()
-        }
-        catch (e) {
-
-        }
-    }
-
     handleSave = async () => {
-        const {poNumber, issueNumber, poDate, issueDate, description, rows} = this.state
-        const {editMode, viewMode, addMode, currentUser: {name}, toggleEditMode, toggleAddMode, showMessage} = this.props
+        const {showMessage, savePo} = this.props
 
         // validating fields
         if (this.validateFields()) {
-
-            // loading state: true
-            this.toggleLoading()
-
-            // converting to firebase format
-            let materials = {}
-            rows.forEach(({matName, quantity, unit}) => {
-                materials[matName] = [quantity, unit]
-            })
-
-            let docRef = doc(db, "po", poNumber)
-            if (addMode) {
-                // creating new firebase doc
-                try {
-                    await setDoc(docRef, {
-                        issueNo: issueNumber,
-                        issueDate: Timestamp.fromDate(issueDate),
-                        poDate: Timestamp.fromDate(poDate),
-                        description: description,
-                        material: materials,
-                        lastEditedBy: name,
-                        lastEditedTime: Timestamp.fromDate(new Date())
-                    })
-
-                    viewMode ? await this.refreshPoDetails(poNumber, toggleAddMode) : toggleAddMode()
-                } catch (e) {
-                    showMessage("Failed to add P.O")
-                }
-            } else if (editMode) {
-                // updating existing doc
-                try{
-                    await updateDoc(docRef, {
-                        issueNo: issueNumber,
-                        issueDate: Timestamp.fromDate(issueDate),
-                        poDate: Timestamp.fromDate(poDate),
-                        description: description,
-                        material: materials,
-                        lastEditedBy: name,
-                        lastEditedTime: Timestamp.fromDate(new Date())
-                    })
-
-                    await this.refreshPoDetails(poNumber, toggleEditMode)
-                }catch(e){
-                    showMessage(e.message)
-                }
-            }
-            // loading state: false
-            this.toggleLoading()
-
+            savePo(this.state)
         } else {
-            showMessage("Invalid Data !")
+            showMessage("Invalid Data")
         }
     }
 
     render() {
-        const {poNumber, issueNumber, poDate, issueDate, description, rows, isLoading} = this.state
-        const {editMode, toggleEditMode, toggleAddMode} = this.props
+        const {poNumber, issueNumber, poDate, issueDate, description, rows} = this.state
+        const {editMode, isFetching, setEditMode, setAddMode} = this.props
 
         return <Grow in>
             {
-                isLoading ? (<LoadingSpinner/>) : (
+                isFetching ? (<LoadingSpinner/>) : (
                     <Paper elevation={6} style={{overflowY: "scroll"}}>
                         <Stack>
                             <Grid container spacing={2} padding={2}>
                                 <Grid item sm={12} md={6}>
                                     <div style={{display: "flex", alignItems: "flex-end"}}>
-                                        <Typography variant="h4">
+                                        <Typography variant="h5" fontWeight={500}>
                                             {editMode ? ("Edit P.O") : ("Add P.O")}
                                         </Typography>
                                     </div>
@@ -175,7 +111,9 @@ class PoEditAdd extends React.Component {
                                             Save
                                         </Button>
                                         <Button variant="outlined" startIcon={<CancelOutlined/>} style={{height: 40}}
-                                                onClick={editMode ? toggleEditMode : toggleAddMode}>
+                                                onClick={() => {
+                                                    editMode ? setEditMode(false) : setAddMode(false)
+                                                }}>
                                             Cancel
                                         </Button>
                                     </div>
@@ -308,14 +246,15 @@ const mapStateToProps = (state) => ({
     poData: selectPoData(state),
     addMode: selectPoAdd(state),
     editMode: selectPoEdit(state),
-    viewMode: selectPoView(state)
+    viewMode: selectPoView(state),
+    isFetching: selectIsPoFetching(state)
 })
 
 const mapDispatchToProps = dispatch => ({
-    setPoData: po => dispatch(setPoData(po)),
-    toggleViewMode: () => dispatch(toggleViewMode()),
-    toggleEditMode: () => dispatch(toggleEditMode()),
-    toggleAddMode: () => dispatch(toggleAddMode()),
+    setViewMode: () => dispatch(setViewMode()),
+    setEditMode: () => dispatch(setEditMode()),
+    setAddMode: () => dispatch(setAddMode()),
+    savePo: data => dispatch(savePo(data)),
     showMessage: message => dispatch(showMessage(message))
 })
 
