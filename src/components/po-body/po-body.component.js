@@ -55,6 +55,7 @@ const PoViewBody = ({
                         setSearchText,
                         setEditMode,
                         fetchPo,
+    setAddMode,
                         downloadPo,
                         deletePo,
                         isFetching
@@ -117,6 +118,7 @@ const PoViewBody = ({
                         </Button>
                     </DialogActions>
                 </Dialog>
+
                 <TextField
                     hiddenLabel
                     id="filled-hidden-label-normal"

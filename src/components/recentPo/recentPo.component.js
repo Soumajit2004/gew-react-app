@@ -6,10 +6,11 @@ import "./recentPo.styles.scss"
 import {parseDate} from "../../utilils/functions.utilis";
 import {withRouter} from "react-router";
 import {fetchPo, setSearchText} from "../../redux/po/po.actions.";
-import {selectRecentPo} from "../../redux/recentPo/recentPo.selectors";
-import {fetchRecentPo} from "../../redux/recentPo/recentPo.actions";
+import {selectRecentPo, selectRecentPoAll} from "../../redux/recentPo/recentPo.selectors";
+import {fetchRecentPo, setRecentPoAll} from "../../redux/recentPo/recentPo.actions";
+import {ArrowRight, ArrowRightAltOutlined} from "@mui/icons-material";
 
-const RecentPo = ({recentPo: {docs}, fetchRecentPo, setSearchText, fetchPo, history}) => {
+const RecentPo = ({recentPo: {docs}, fetchRecentPo, setSearchText, fetchPo, history, setRecentPoAll, isViewAll}) => {
 
     useEffect(() => {
         fetchRecentPo()
@@ -18,7 +19,8 @@ const RecentPo = ({recentPo: {docs}, fetchRecentPo, setSearchText, fetchPo, hist
 
     const getItems = () => {
         try {
-            return docs.map((e) => {
+            let items = []
+            items.push(docs.map((e) => {
                 return (
                     <Grid key={e.id} item xs={12} lg={3} md={4}>
                         <Grow in>
@@ -39,7 +41,33 @@ const RecentPo = ({recentPo: {docs}, fetchRecentPo, setSearchText, fetchPo, hist
                         </Grow>
                     </Grid>
                 )
-            })
+            }))
+
+            if (!isViewAll) {
+                items.push(
+                    <Grid key="all" item xs={12} lg={3} md={4}>
+                        <Grow in>
+                            <Card elevation={6} className="r-po-card" onClick={() => {
+                                setRecentPoAll(true)
+                                fetchRecentPo()
+                            }}>
+                                <CardContent style={{
+                                    height: "100%",
+                                    display: "flex",
+                                    justifyContent: "center",
+                                    alignItems: "center"
+                                }}>
+                                    <Typography variant="h5" fontWeight={400}>
+                                        Show All
+                                    </Typography>
+                                    <ArrowRightAltOutlined fontSize="large"/>
+                                </CardContent>
+                            </Card>
+                        </Grow>
+                    </Grid>)
+            }
+
+            return items
         } catch (e) {
             return (
                 <Grid item xs={12} lg={3} md={6}>
@@ -59,6 +87,7 @@ const RecentPo = ({recentPo: {docs}, fetchRecentPo, setSearchText, fetchPo, hist
             <Box>
                 <Grid container spacing={3}>
                     {getItems()}
+
                 </Grid>
             </Box>
         </Stack>
@@ -67,12 +96,15 @@ const RecentPo = ({recentPo: {docs}, fetchRecentPo, setSearchText, fetchPo, hist
 
 const mapStateToProps = (state) => ({
     recentPo: selectRecentPo(state),
+    isViewAll: selectRecentPoAll(state)
 })
 
 const mapDispatchToProps = dispatch => ({
     setSearchText: text => dispatch(setSearchText(text)),
+    setRecentPoAll: bool => dispatch(setRecentPoAll(bool)),
     fetchRecentPo: () => dispatch(fetchRecentPo()),
     fetchPo: () => dispatch(fetchPo())
+
 })
 
 export default withRouter(connect(mapStateToProps, mapDispatchToProps)(RecentPo))

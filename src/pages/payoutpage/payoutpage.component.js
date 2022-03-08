@@ -4,6 +4,7 @@ import {Tab} from "@mui/material";
 import Box from "@mui/material/Box";
 import {TabContext, TabList, TabPanel} from "@mui/lab";
 import PayoutMain from "../../components/payout-main/payoutMain.component";
+import PaymentHistory from "../../components/payment-history/paymentHistory.component";
 
 const PayoutPage = () => {
 
@@ -21,7 +22,9 @@ const PayoutPage = () => {
                 <TabPanel value="1">
                     <PayoutMain/>
                 </TabPanel>
-                <TabPanel value="2">Under Development</TabPanel>
+                <TabPanel value="2">
+                    <PaymentHistory/>
+                </TabPanel>
             </TabContext>
         </Box>
     </HeaderComponent>

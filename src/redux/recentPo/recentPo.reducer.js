@@ -2,7 +2,8 @@ import {RecentPoActionTypes} from "./recentPo.types";
 
 const INITIAL_STATE = {
     recentPo: [],
-    isFetching: false
+    isFetching: false,
+    viewAll:false
 }
 
 const recentPoReducer = (state = INITIAL_STATE, action) => {
@@ -23,6 +24,11 @@ const recentPoReducer = (state = INITIAL_STATE, action) => {
                 ...state,
                 isFetching: false,
                 recentPo: []
+            }
+        case RecentPoActionTypes.SET_RECENT_PO_ALL:
+            return {
+                ...state,
+                viewAll: action.payload
             }
         default:
             return state

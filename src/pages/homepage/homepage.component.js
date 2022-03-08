@@ -1,8 +1,9 @@
 import React from "react";
 import "./homepage.styles.scss";
-import {Button, Container,Stack, Typography} from "@mui/material";
+import {Button, Container, Fade, Stack, Typography} from "@mui/material";
 
 const HomePage = () => (
+    <Fade in>
     <div className="home-page">
         <Container
             style=
@@ -27,6 +28,7 @@ const HomePage = () => (
                 </Stack>
             }/>
     </div>
+    </Fade>
 )
 
 export default HomePage

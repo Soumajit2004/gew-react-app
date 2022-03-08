@@ -1,8 +1,13 @@
 import {createSelector} from "reselect";
 
-const selectPo = state => state.recentPo
+const selectRPo = state => state.recentPo
 
 export const selectRecentPo = createSelector(
-    [selectPo],
-    po => po.recentPo
+    [selectRPo],
+    recentPo => recentPo.recentPo
+)
+
+export const selectRecentPoAll = createSelector(
+    [selectRPo],
+    recentPo => recentPo.viewAll
 )

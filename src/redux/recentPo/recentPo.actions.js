@@ -19,3 +19,9 @@ export const fetchRecentPoFailure = () => {
     }
 }
 
+export const setRecentPoAll = bool => {
+    return {
+        type: RecentPoActionTypes.SET_RECENT_PO_ALL,
+        payload: bool
+    }
+}
