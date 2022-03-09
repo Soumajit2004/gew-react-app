@@ -51,45 +51,62 @@ const SignInForm = ({showMessage}) => {
     const handleSubmit = async (event) => {
         event.preventDefault()
 
-        try{
+        try {
             const data = new FormData(event.currentTarget)
             const email = data.get("email"), password = data.get("password"), phoneNumber = data.get("phoneNumber")
 
             if (isEmail(email) && password) {
-                try{
-                    await signInWithEmailAndPassword(auth, email, password)
-                }catch (e) {
-                    showMessage(e.toString())
-                }
+                await signInWithEmailAndPassword(auth, email, password)
             } else if (isMobilePhone(phoneNumber)) {
-                try {
-                    const response = await getDocs(query(collection(db, "users"), where("phoneNumber", "==", `+91${phoneNumber}`)))
+                const response = await getDocs(query(collection(db, "users"), where("phoneNumber", "==", `+91${phoneNumber}`)))
 
-                    const user = response.docs[0].data() | ""
+                const user = response.docs[0].data() | ""
 
-                    if (user.phoneNumber === `+91${phoneNumber}` && user.authMethod === `phone`) {
-                        recaptchaVerifier()
-                        const appVerifier = window.recaptchaVerifier;
-
-                        try {
-                            window.otpVerifier = await signInWithPhoneNumber(auth, `+91${phoneNumber}`, appVerifier)
-
-                            setDialogOpen(true)
-                        } catch (e) {
-                            showMessage(e.message)
-                        }
-                    }
-
-                } catch (e) {
-                    showMessage("Phone No Not Registered !")
+                if (user.phoneNumber === `+91${phoneNumber}` && user.authMethod === `phone`) {
+                    recaptchaVerifier()
+                    const appVerifier = window.recaptchaVerifier;
+                    window.otpVerifier = await signInWithPhoneNumber(auth, `+91${phoneNumber}`, appVerifier)
+                    setDialogOpen(true)
                 }
             } else {
-                showMessage("Invalid Details !")
+                throw Error("Invalid Data")
             }
-        }catch (e) {
-
+        } catch (e) {
+            showMessage(e.message)
         }
     };
+
+    const OTPDialog = () => {
+        return <Dialog open={isDialogOpen}
+                       disableEscapeKeyDown={true}
+                       onClose={() => {
+                           setDialogOpen(false)
+                       }}>
+            <DialogTitle>Enter OTP</DialogTitle>
+            <DialogContent>
+                <DialogContentText>
+                    {`An OTP has been send to your registered phone no`}
+                </DialogContentText>
+                <TextField
+                    autoFocus
+                    margin="dense"
+                    id="otp"
+                    label="OTP"
+                    fullWidth
+                    variant="standard"
+                    onChange={(e) => {
+                        setOTP(e.target.value)
+                    }}
+                />
+            </DialogContent>
+            <DialogActions>
+                <Button onClick={() => {
+                    setDialogOpen(false)
+                }}>Cancel</Button>
+                <Button onClick={confirmOtp}>Login</Button>
+            </DialogActions>
+        </Dialog>
+    }
 
     return (
         <Box
@@ -105,30 +122,7 @@ const SignInForm = ({showMessage}) => {
             onSubmit={handleSubmit}
         >
             <div id='recaptcha-container'/>
-
-            <Dialog open={isDialogOpen}
-                    disableEscapeKeyDown={true}
-                    onClose={()=>{setDialogOpen(false)}}>
-                <DialogTitle>Enter OTP</DialogTitle>
-                <DialogContent>
-                    <DialogContentText>
-                        {`An OTP has been send to your registered phone no`}
-                    </DialogContentText>
-                    <TextField
-                        autoFocus
-                        margin="dense"
-                        id="otp"
-                        label="OTP"
-                        fullWidth
-                        variant="standard"
-                        onChange={(e) => {setOTP(e.target.value)}}
-                    />
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={()=>{setDialogOpen(false)}}>Cancel</Button>
-                    <Button onClick={confirmOtp}>Login</Button>
-                </DialogActions>
-            </Dialog>
+            <OTPDialog/>
 
             <Typography component="h2" variant="h2" fontWeight={600}>
                 Sign in
@@ -179,7 +173,9 @@ const SignInForm = ({showMessage}) => {
                         id="otp-button"
                         variant="outlined"
                         sx={{mt: 3, mb: 2}}
-                        onClick={()=>{setDialogOpen(true)}}
+                        onClick={() => {
+                            setDialogOpen(true)
+                        }}
                     >
                         Enter OTP
                     </Button> : null

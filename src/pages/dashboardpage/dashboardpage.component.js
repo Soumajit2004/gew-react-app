@@ -1,9 +1,9 @@
-import React, {useEffect, useState} from "react";
+import React from "react";
 import HeaderComponent from "../../components/header/header.component";
 import {Container, Divider, Stack, Typography} from "@mui/material";
 import {connect} from "react-redux";
 import {selectCurrentUser} from "../../redux/user/user.selector";
-import RecentPo from "../../components/recentPo/recentPo.component";
+import RecentPo from "../../components/recent-PO/recentPo.component";
 
 const DashboardPage = ({currentUser:{name}}) => {
 

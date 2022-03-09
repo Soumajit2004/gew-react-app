@@ -8,13 +8,13 @@ import {withRouter} from "react-router";
 import {fetchPo, setSearchText} from "../../redux/po/po.actions.";
 import {selectRecentPo, selectRecentPoAll} from "../../redux/recentPo/recentPo.selectors";
 import {fetchRecentPo, setRecentPoAll} from "../../redux/recentPo/recentPo.actions";
-import {ArrowRight, ArrowRightAltOutlined} from "@mui/icons-material";
+import {ArrowRightAltOutlined} from "@mui/icons-material";
 
 const RecentPo = ({recentPo: {docs}, fetchRecentPo, setSearchText, fetchPo, history, setRecentPoAll, isViewAll}) => {
 
     useEffect(() => {
         fetchRecentPo()
-    }, [])
+    })
 
 
     const getItems = () => {

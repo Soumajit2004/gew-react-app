@@ -5,33 +5,27 @@ import {
     Card,
     CardContent, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle,
     Divider,
-    Fade,
     Grid,
     Grow,
     Menu,
     MenuItem,
     Paper,
     Stack,
-    TextField
 } from "@mui/material";
 import Typography from "@mui/material/Typography";
 import IconButton from "@mui/material/IconButton";
-import {doc, deleteDoc} from "firebase/firestore";
-import {ref, getDownloadURL} from "firebase/storage";
 import {
-    Add,
     Edit,
     MenuOutlined,
-    Search
 } from "@mui/icons-material";
 
 import {DataGrid} from "@mui/x-data-grid";
-import {downloadFromUrl, parseDate} from "../../utilils/functions.utilis";
+import {parseDate} from "../../utilils/functions.utilis";
 import {connect} from "react-redux";
-import {db, doxPoFirebaseFnc, storage} from "../../firebase/firebase.utils";
 import {selectPoData, selectPoSearch} from "../../redux/po/po.selectors.";
 import {deletePo, downloadPo, fetchPo, setAddMode, setEditMode, setSearchText} from "../../redux/po/po.actions.";
 import LoadingSpinner from "../withSpinner/isLoadingSpinner";
+import PoSearch from "../po-search/poSearch.component";
 
 const columns = [
     {field: 'id', headerName: 'ID', width: 50},
@@ -51,11 +45,7 @@ const PoViewBody = ({
                             lastEditedBy,
                             lastEditedTime
                         },
-                        searchText,
-                        setSearchText,
                         setEditMode,
-                        fetchPo,
-    setAddMode,
                         downloadPo,
                         deletePo,
                         isFetching
@@ -96,50 +86,26 @@ const PoViewBody = ({
     }
 
     return <Stack spacing={2}>
-        <Fade in>
-            <Stack direction="row" spacing={2}>
-
-                <Dialog
-                    open={detailsOpen}
-                    onClose={handleDetailsClose}
-                >
-                    <DialogTitle>
-                        Other Details
-                    </DialogTitle>
-                    <DialogContent>
-                        <DialogContentText id="alert-dialog-description">
-                            <Typography>{`Last modified by : ${lastEditedBy}`}</Typography>
-                            <Typography>{`Last modified on : ${parseDate({date: lastEditedTime})}`}</Typography>
-                        </DialogContentText>
-                    </DialogContent>
-                    <DialogActions>
-                        <Button onClick={handleDetailsClose} autoFocus>
-                            Okay
-                        </Button>
-                    </DialogActions>
-                </Dialog>
-
-                <TextField
-                    hiddenLabel
-                    id="filled-hidden-label-normal"
-                    placeholder="Search P.O"
-                    value={searchText}
-                    variant="filled"
-                    fullWidth={true}
-                    onChange={(e) => {
-                        setSearchText(e.target.value)
-                    }}
-                />
-                <Button variant="contained" onClick={fetchPo}>
-                    <Search/>
+        <Dialog
+            open={detailsOpen}
+            onClose={handleDetailsClose}
+        >
+            <DialogTitle>
+                Other Details
+            </DialogTitle>
+            <DialogContent>
+                <DialogContentText id="alert-dialog-description">
+                    <Typography>{`Last modified by : ${lastEditedBy}`}</Typography>
+                    <Typography>{`Last modified on : ${parseDate({date: lastEditedTime})}`}</Typography>
+                </DialogContentText>
+            </DialogContent>
+            <DialogActions>
+                <Button onClick={handleDetailsClose} autoFocus>
+                    Okay
                 </Button>
-                <Button variant="contained" onClick={() => {
-                    setAddMode(true)
-                }}>
-                    <Add/>
-                </Button>
-            </Stack>
-        </Fade>
+            </DialogActions>
+        </Dialog>
+        <PoSearch/>
         <Divider/>
         <Grow in>
             {
