@@ -5,9 +5,7 @@ import {fetchPo, setAddMode, setSearchText} from "../../redux/po/po.actions.";
 import {selectPoSearch} from "../../redux/po/po.selectors.";
 import {connect} from "react-redux";
 
-const PoSearch = ({searchText, setSearchText, setAddMode}) => {
-
-
+const PoSearch = ({searchText, setSearchText, setAddMode, fetchPo}) => {
     return <Fade in>
         <Stack direction="row" spacing={2}>
             <TextField

@@ -15,14 +15,23 @@ import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import ListItem from '@mui/material/ListItem';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
-import {AppRegistration, Dashboard, Logout, Pages, Payment} from "@mui/icons-material";
+import {
+    AccountCircle,
+    AppRegistration,
+    Dashboard,
+    Logout,
+    Pages,
+    Payment,
+    VerifiedUserRounded
+} from "@mui/icons-material";
 import {withRouter} from "react-router";
 import {auth} from "../../firebase/firebase.utils";
-import {Fade} from "@mui/material";
+import {Button, Fade, Stack} from "@mui/material";
 import {connect} from "react-redux";
 import {selectCurrentUser} from "../../redux/user/user.selector";
 
-const drawerWidth = 240;
+
+const drawerWidth = 220;
 
 const Main = styled('main', {shouldForwardProp: (prop) => prop !== 'open'})(
     ({theme, open}) => ({
@@ -68,7 +77,7 @@ const DrawerHeader = styled('div')(({theme}) => ({
     justifyContent: 'flex-end',
 }));
 
-function HeaderComponent({title, children, history, currentUser}) {
+const HeaderComponent = ({title, children, history, currentUser}) => {
     const theme = useTheme();
     const [open, setOpen] = React.useState(false);
 
@@ -86,6 +95,11 @@ function HeaderComponent({title, children, history, currentUser}) {
         }
     }
 
+    const signOut = () => {
+        auth.signOut()
+            .then(() => redirectTo("/sign-in"))
+    }
+
     return (
         <Fade in>
             <Box sx={{display: 'flex'}}>
@@ -101,9 +115,17 @@ function HeaderComponent({title, children, history, currentUser}) {
                         >
                             <MenuIcon/>
                         </IconButton>
-                        <Typography variant="h6" noWrap component="div">
+                        <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
                             {title}
                         </Typography>
+                        <Stack direction="row" spacing={2}>
+                            <Button variant="contained" color="secondary" startIcon={<AccountCircle/>}>
+                                {currentUser.name}
+                            </Button>
+                            <Button variant="contained" color="error" startIcon={<Logout/>} onClick={signOut}>
+                                Sign-out
+                            </Button>
+                        </Stack>
                     </Toolbar>
                 </AppBar>
                 <Drawer
@@ -162,10 +184,7 @@ function HeaderComponent({title, children, history, currentUser}) {
                     </List>
                     <Divider/>
                     <List>
-                        <ListItem button key={5} onClick={() => {
-                            auth.signOut()
-                                .then(() => redirectTo("/sign-in"))
-                        }}>
+                        <ListItem button key={5} onClick={signOut}>
                             <ListItemIcon>
                                 <Logout/>
                             </ListItemIcon>

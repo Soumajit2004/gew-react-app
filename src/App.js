@@ -63,15 +63,15 @@ class App extends React.Component {
                         <Suspense fallback={<IsLoadingSpinner/>}>
                             <Route exact path="/" component={HomePage}/>
                             <Route exact path="/sign-in"
-                                   render={() => (currentUser ? <Redirect to="/dashboard"/> : <SignInPage/>)}/>
+                                   render={() => currentUser ? <Redirect to="/dashboard"/> : <SignInPage/>}/>
                             <Route exact path="/dashboard"
-                                   render={() => (currentUser ? <DashboardPage/> : <Redirect to="/sign-in"/>)}/>
+                                   render={() => currentUser ? <DashboardPage/> : <Redirect to="/sign-in"/>}/>
                             <Route exact path="/po-manager"
                                    render={() => currentUser ? (<PoPage/>) : (<Redirect to="/sign-in"/>)}/>
                             <Route exact path="/register"
-                                   render={() => (this.getUserRole() !== "field") ? (<RegisterPage/>) : (<Redirect to="/dashboard"/>)}/>
+                                   render={() => currentUser ? (<RegisterPage/>) : (<Redirect to="/sign-in"/>)}/>
                             <Route exact path="/payouts"
-                                   render={() => (this.getUserRole() === "owner") ? (<PayoutPage/>) : (<Redirect to="/dashboard"/>)}/>
+                                   render={() => (this.getUserRole() === "owner") ? (<PayoutPage/>) : (<Redirect to="/sign-in"/>)}/>
                         </Suspense>
                     </ErrorBoundary>
                 </Switch>

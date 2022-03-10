@@ -25,9 +25,7 @@ import {connect} from "react-redux";
 const SignInForm = ({showMessage}) => {
 
     const [isDialogOpen, setDialogOpen] = useState(false)
-
     const [otp, setOTP] = useState("")
-
     const [isRecaptchaReady, setRecaptchaReady] = useState(false)
 
     const recaptchaVerifier = () => {

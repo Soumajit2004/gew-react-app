@@ -14,7 +14,7 @@ const RecentPo = ({recentPo: {docs}, fetchRecentPo, setSearchText, fetchPo, hist
 
     useEffect(() => {
         fetchRecentPo()
-    })
+    }, [])
 
 
     const getItems = () => {

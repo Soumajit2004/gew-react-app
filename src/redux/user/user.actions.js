@@ -6,3 +6,23 @@ export const setCurrentUser = user => {
             payload: user
     }
 }
+
+export const fetchUsers = () => {
+    return {
+        type: UserActionTypes.FETCH_USERS_START,
+    }
+}
+
+export const fetchUsersSuccess = (usersList, userRows) => {
+    return {
+        type: UserActionTypes.FETCH_USERS_SUCCESS,
+        users: usersList,
+        userRows: userRows
+    }
+}
+
+export const fetchUsersFailure = () => {
+    return {
+        type: UserActionTypes.FETCH_USERS_FAILURE
+    }
+}

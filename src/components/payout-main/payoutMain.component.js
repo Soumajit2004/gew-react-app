@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from "react";
-import {collection, doc, getDoc, getDocs, orderBy, query, updateDoc} from "firebase/firestore";
+import {doc, updateDoc} from "firebase/firestore";
 import {db, payUserFnc} from "../../firebase/firebase.utils";
-import {DataGrid, GridColDef} from "@mui/x-data-grid";
+import {DataGrid} from "@mui/x-data-grid";
 import LoadingSpinner from "../withSpinner/isLoadingSpinner";
 import {showMessage} from "../../redux/snackbar/snackbar.actions";
 import {
@@ -19,14 +19,14 @@ import {connect} from "react-redux";
 import Divider from "@mui/material/Divider";
 import {Edit, RefreshOutlined} from "@mui/icons-material";
 import IconButton from "@mui/material/IconButton";
+import {fetchUsers} from "../../redux/user/user.actions";
+import {selectIsUsersFetching, selectUsersRows} from "../../redux/user/user.selector";
 
 
-const PayoutMain = ({showMessage}) => {
-    const [rows, setRows] = useState([])
+const PayoutMain = ({showMessage, fetchUsers, isFetching, userRows}) => {
     const [selections, setSelections] = useState([])
-    const [isLoading, setLoading] = useState(true)
     const [confDialog, setConfDialog] = useState(false)
-    const columns: GridColDef[] = [
+    const columns = [
         {field: 'name', headerName: 'Name', width: 250},
         {field: 'bankAccountNumber', headerName: 'Account No', width: 250},
         {field: 'salary', headerName: 'Salary', width: 150},
@@ -71,33 +71,6 @@ const PayoutMain = ({showMessage}) => {
         }
     }
 
-    const fetchUsers = async () => {
-        try {
-            const userQuery = await getDocs(query(collection(db, "users"), orderBy("name", "desc")));
-
-            const filteredRows = []
-            for (const elem of userQuery.docs) {
-                const data = elem.data()
-
-                if (data.role !== "owner") {
-                    let lastPayedDate = ""
-                    if (data.lastPayed) {
-                        const paymentData = (await getDoc(doc(db, "paymentHistory", data.lastPayed))).data()
-                        console.log(paymentData.created_at)
-                        lastPayedDate = new Date(parseInt(paymentData.created_at) * 1000)
-                    }
-
-                    filteredRows.push({id: elem.id, lastPayedDate: lastPayedDate.toString(), ...data})
-                }
-            }
-
-            setRows(filteredRows)
-            setLoading(false)
-        } catch (e) {
-            showMessage(e)
-        }
-    }
-
     const handlePay = async () => {
         if (selections.length > 0) {
             for (let e of selections) {
@@ -117,8 +90,8 @@ const PayoutMain = ({showMessage}) => {
         let recentlyPaidNames = []
         if (confDialog) {
             for (let e in selections) {
-                for (let i in rows) {
-                    i = rows[i]
+                for (let i in userRows) {
+                    i = userRows[i]
                     if (i.id === selections[e]) {
                         totalAmount += parseInt(i.salary)
 
@@ -167,7 +140,7 @@ const PayoutMain = ({showMessage}) => {
     return <Container style={{height: "80vh"}}>
         <PaymentConformationDialog/>
         {
-            isLoading ? <LoadingSpinner/> :
+            isFetching ? <LoadingSpinner/> :
                 (<Fade in>
                     <Stack height="100%" spacing={2}>
                         <Stack spacing={1}>
@@ -187,7 +160,7 @@ const PayoutMain = ({showMessage}) => {
                             <Divider/>
                         </Stack>
                         <DataGrid
-                            rows={rows}
+                            rows={userRows}
                             columns={columns}
                             checkboxSelection
                             disableSelectionOnClick
@@ -203,8 +176,15 @@ const PayoutMain = ({showMessage}) => {
 
 }
 
-const mapDispatchToProp = dispatch => ({
-    showMessage: message => dispatch(showMessage(message))
+const mapStateToProps = state => ({
+    isFetching: selectIsUsersFetching(state),
+    userRows: selectUsersRows(state)
 })
 
-export default connect(null, mapDispatchToProp)(PayoutMain)
+
+const mapDispatchToProp = dispatch => ({
+    showMessage: message => dispatch(showMessage(message)),
+    fetchUsers: () => dispatch(fetchUsers()),
+})
+
+export default connect(mapStateToProps, mapDispatchToProp)(PayoutMain)

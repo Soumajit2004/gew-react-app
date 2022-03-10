@@ -1,7 +1,8 @@
 import {initializeApp} from "firebase/app";
+import {initializeAppCheck, ReCaptchaV3Provider} from "firebase/app-check";
 import {getAnalytics} from "firebase/analytics";
 import {getAuth, browserSessionPersistence, setPersistence, connectAuthEmulator} from "firebase/auth";
-import {getFirestore, getDocFromCache, doc, getDoc, connectFirestoreEmulator} from "firebase/firestore";
+import {getFirestore, connectFirestoreEmulator} from "firebase/firestore";
 import { getFunctions, httpsCallable, connectFunctionsEmulator} from 'firebase/functions';
 import { getStorage, connectStorageEmulator} from 'firebase/storage';
 
@@ -16,10 +17,14 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
+
 // eslint-disable-next-line no-unused-vars
 const analytics = getAnalytics(app);
 
 export const auth = getAuth(app)
+setPersistence(auth, browserSessionPersistence)
+
+
 export const db = getFirestore(app)
 export const storage = getStorage(app);
 const functions = getFunctions(app, "asia-south1")
@@ -29,25 +34,17 @@ if (process.env.NODE_ENV === 'development'){
     connectFirestoreEmulator(db, 'localhost', 8080);
     connectStorageEmulator(storage, "localhost", 9199);
     connectFunctionsEmulator(functions, "localhost", 5001);
+}else{
+    initializeAppCheck(app, {
+        provider: new ReCaptchaV3Provider('6Ldm0cUeAAAAAKHkhbFwEQMLXW8ZK8RqGEzwTQ_h'),
+        isTokenAutoRefreshEnabled: true
+    });
 }
-
 
 export const createUserWithPhone = httpsCallable(functions, 'createUserWithPhone')
 export const doxPoFirebaseFnc = httpsCallable(functions, 'docxPo')
 export const payUserFnc = httpsCallable(functions, 'payUsers')
 
 
-setPersistence(auth, browserSessionPersistence).then(r => {})
 
-export const customGetPoDoc = async (poId) => {
-    const docRef = doc(db, "po", poId.toString());
-    let res = null
 
-    try {
-        res = await getDocFromCache(docRef)
-    } catch (e) {
-        res = await getDoc(docRef)
-    }
-
-    return res
-}

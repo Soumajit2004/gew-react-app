@@ -13,9 +13,12 @@ const CustomSnackBar = ({isSnackbarOpen, snackbarMessage, closeSnackbar}) => {
         </IconButton>
     )
 
+    const anchor = {vertical:"bottom", horizontal:"center"}
+
     return (
         <Snackbar open={isSnackbarOpen}
                   action={snackbarAction}
+                  anchorOrigin={anchor}
                   autoHideDuration={3000}
                   message={snackbarMessage}
                   onClose={closeSnackbar}
