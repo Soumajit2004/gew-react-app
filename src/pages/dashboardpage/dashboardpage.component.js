@@ -1,11 +1,12 @@
 import React from "react";
 import HeaderComponent from "../../components/header/header.component";
 import {Container, Divider, Stack, Typography} from "@mui/material";
-import {connect} from "react-redux";
+import {useSelector} from "react-redux";
 import {selectCurrentUser} from "../../redux/user/user.selector";
 import RecentPo from "../../components/recent-PO/recentPo.component";
 
-const DashboardPage = ({currentUser:{name}}) => {
+const DashboardPage = () => {
+    const name = useSelector(selectCurrentUser).name
 
     return (
         <HeaderComponent title="Dashboard">
@@ -25,8 +26,4 @@ const DashboardPage = ({currentUser:{name}}) => {
     )
 }
 
-const mapStateToProps = (state) => ({
-    currentUser: selectCurrentUser(state),
-})
-
-export default connect(mapStateToProps, null)(DashboardPage)
+export default DashboardPage

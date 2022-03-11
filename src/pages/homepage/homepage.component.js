@@ -1,6 +1,7 @@
 import React from "react";
 import "./homepage.styles.scss";
 import {Button, Container, Fade, Stack, Typography} from "@mui/material";
+import RazorpayButton from "../../components/razorpay-button/razorpayButton.component";
 
 const HomePage = () => (
     <Fade in>
@@ -23,7 +24,7 @@ const HomePage = () => (
                     </Typography>
                     <Stack spacing={2} direction="row">
                         <Button variant="contained" href="/sign-in">Dashboard</Button>
-                        <Button variant="contained" color="secondary" href="https://rzp.io/l/UvqW9u0">Pay Here</Button>
+                        <RazorpayButton/>
                     </Stack>
                 </Stack>
             }/>

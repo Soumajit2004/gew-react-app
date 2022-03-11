@@ -5,7 +5,7 @@ import {DataGrid} from "@mui/x-data-grid";
 import LoadingSpinner from "../withSpinner/isLoadingSpinner";
 import {showMessage} from "../../redux/snackbar/snackbar.actions";
 import {
-    Button,
+    Button, CircularProgress,
     Container,
     Dialog, DialogActions,
     DialogContent,
@@ -15,7 +15,7 @@ import {
     Stack,
     Typography
 } from "@mui/material";
-import {connect} from "react-redux";
+import {useDispatch, useSelector} from "react-redux";
 import Divider from "@mui/material/Divider";
 import {Edit, RefreshOutlined} from "@mui/icons-material";
 import IconButton from "@mui/material/IconButton";
@@ -23,9 +23,10 @@ import {fetchUsers} from "../../redux/user/user.actions";
 import {selectIsUsersFetching, selectUsersRows} from "../../redux/user/user.selector";
 
 
-const PayoutMain = ({showMessage, fetchUsers, isFetching, userRows}) => {
+const PayoutMain = () => {
     const [selections, setSelections] = useState([])
     const [confDialog, setConfDialog] = useState(false)
+    const [isPaying, setIsPaying] = useState(false)
     const columns = [
         {field: 'name', headerName: 'Name', width: 250},
         {field: 'bankAccountNumber', headerName: 'Account No', width: 250},
@@ -49,9 +50,16 @@ const PayoutMain = ({showMessage, fetchUsers, isFetching, userRows}) => {
         }
     ];
 
+    const isFetching = useSelector(selectIsUsersFetching)
+    const userRows = useSelector(selectUsersRows)
+
+    const dispatch = useDispatch()
+    const showMessageHandler = () => dispatch(showMessage())
+    const fetchUsersHandler = () => dispatch(fetchUsers())
+
     useEffect(() => {
-        fetchUsers()
-    }, [])
+        fetchUsersHandler()
+    }, [dispatch])
 
     const handleSalaryEdit = async (id) => {
         try {
@@ -61,27 +69,27 @@ const PayoutMain = ({showMessage, fetchUsers, isFetching, userRows}) => {
                 await updateDoc(doc(db, "users", id), {
                     salary: newSalary
                 });
-
-                showMessage("Salary updated !")
+                showMessageHandler("Salary updated !")
             } else {
-                showMessage("Enter some value")
+                showMessageHandler("Enter some value")
             }
         } catch (e) {
-            showMessage("Failed to update salary")
+            showMessageHandler("Failed to update salary")
         }
     }
 
     const handlePay = async () => {
         if (selections.length > 0) {
+            setIsPaying(true)
             for (let e of selections) {
                 try {
-                    showMessage(`Paying...`)
                     await payUserFnc({id: e.toString()})
-                    showMessage(`Payed successfully`)
                 } catch (er) {
                     showMessage(er.message)
                 }
             }
+            setIsPaying(false)
+            showMessageHandler("Paid Successfully")
         }
     }
 
@@ -108,9 +116,7 @@ const PayoutMain = ({showMessage, fetchUsers, isFetching, userRows}) => {
 
         return <Dialog
             open={confDialog}
-            onClose={() => {
-                setConfDialog(false)
-            }}
+            onClose={() => {setConfDialog(false)}}
             aria-labelledby="alert-dialog-title"
             aria-describedby="alert-dialog-description"
         >
@@ -137,8 +143,29 @@ const PayoutMain = ({showMessage, fetchUsers, isFetching, userRows}) => {
         </Dialog>
     }
 
+    const PayingDialog = () => {
+        return <Dialog
+            open={isPaying}
+            maxWidth={"xs"}
+            fullWidth={true}
+        >
+            <DialogContent>
+                <Stack spacing={3} style={{justifyContent:"center", alignItems:"center"}}>
+                    <CircularProgress size={60}/>
+                    <Typography variant="h4" fontWeight={500}>
+                        Paying
+                    </Typography>
+                    <Typography>
+                        This may take some time, don't close the window
+                    </Typography>
+                </Stack>
+            </DialogContent>
+        </Dialog>
+    }
+
     return <Container style={{height: "80vh"}}>
         <PaymentConformationDialog/>
+        <PayingDialog/>
         {
             isFetching ? <LoadingSpinner/> :
                 (<Fade in>
@@ -152,7 +179,7 @@ const PayoutMain = ({showMessage, fetchUsers, isFetching, userRows}) => {
                                         setConfDialog(true)
                                     }}
                                             disabled={selections.length === 0}>Pay Salary</Button>
-                                    <Button variant="outlined" onClick={fetchUsers}>
+                                    <Button variant="outlined" onClick={fetchUsersHandler}>
                                         <RefreshOutlined/>
                                     </Button>
                                 </Stack>
@@ -172,19 +199,6 @@ const PayoutMain = ({showMessage, fetchUsers, isFetching, userRows}) => {
                 </Fade>)
         }
     </Container>
-
-
 }
 
-const mapStateToProps = state => ({
-    isFetching: selectIsUsersFetching(state),
-    userRows: selectUsersRows(state)
-})
-
-
-const mapDispatchToProp = dispatch => ({
-    showMessage: message => dispatch(showMessage(message)),
-    fetchUsers: () => dispatch(fetchUsers()),
-})
-
-export default connect(mapStateToProps, mapDispatchToProp)(PayoutMain)
+export default PayoutMain

@@ -1,7 +1,7 @@
 import React, {useEffect} from "react";
 import {Card, CardContent, Grid, Grow, Stack, Typography} from "@mui/material";
 import Box from "@mui/material/Box";
-import {connect} from "react-redux";
+import {useDispatch, useSelector} from "react-redux";
 import "./recentPo.styles.scss"
 import {parseDate} from "../../utilils/functions.utilis";
 import {withRouter} from "react-router";
@@ -10,12 +10,16 @@ import {selectRecentPo, selectRecentPoAll} from "../../redux/recentPo/recentPo.s
 import {fetchRecentPo, setRecentPoAll} from "../../redux/recentPo/recentPo.actions";
 import {ArrowRightAltOutlined} from "@mui/icons-material";
 
-const RecentPo = ({recentPo: {docs}, fetchRecentPo, setSearchText, fetchPo, history, setRecentPoAll, isViewAll}) => {
+const RecentPo = ({history}) => {
+    const docs = useSelector(selectRecentPo).docs
+    const isViewAll = useSelector(selectRecentPoAll)
+
+    const dispatch = useDispatch()
+    const fetchRecentPoHandler = () => dispatch(fetchRecentPo())
 
     useEffect(() => {
-        fetchRecentPo()
-    }, [])
-
+        fetchRecentPoHandler()
+    }, [dispatch])
 
     const getItems = () => {
         try {
@@ -25,8 +29,8 @@ const RecentPo = ({recentPo: {docs}, fetchRecentPo, setSearchText, fetchPo, hist
                     <Grid key={e.id} item xs={12} lg={3} md={4}>
                         <Grow in>
                             <Card elevation={6} className="r-po-card" onClick={() => {
-                                setSearchText(e.id)
-                                fetchPo()
+                                dispatch(setSearchText(e.id))
+                                dispatch(fetchPo())
                                 history.push("/po-manager")
                             }}>
                                 <CardContent>
@@ -48,8 +52,8 @@ const RecentPo = ({recentPo: {docs}, fetchRecentPo, setSearchText, fetchPo, hist
                     <Grid key="all" item xs={12} lg={3} md={4}>
                         <Grow in>
                             <Card elevation={6} className="r-po-card" onClick={() => {
-                                setRecentPoAll(true)
-                                fetchRecentPo()
+                                dispatch(setRecentPoAll(true))
+                                fetchRecentPoHandler()
                             }}>
                                 <CardContent style={{
                                     height: "100%",
@@ -66,7 +70,6 @@ const RecentPo = ({recentPo: {docs}, fetchRecentPo, setSearchText, fetchPo, hist
                         </Grow>
                     </Grid>)
             }
-
             return items
         } catch (e) {
             return (
@@ -81,30 +84,14 @@ const RecentPo = ({recentPo: {docs}, fetchRecentPo, setSearchText, fetchPo, hist
 
     }
 
-    return (
-        <Stack spacing={2}>
-            <Typography variant="h5" fontWeight={300}>Recent P.Os</Typography>
-            <Box>
-                <Grid container spacing={3}>
-                    {getItems()}
-
-                </Grid>
-            </Box>
-        </Stack>
-    )
+    return (<Stack spacing={2}>
+        <Typography variant="h5" fontWeight={300}>Recent P.Os</Typography>
+        <Box>
+            <Grid container spacing={3}>
+                {getItems()}
+            </Grid>
+        </Box>
+    </Stack>)
 }
 
-const mapStateToProps = (state) => ({
-    recentPo: selectRecentPo(state),
-    isViewAll: selectRecentPoAll(state)
-})
-
-const mapDispatchToProps = dispatch => ({
-    setSearchText: text => dispatch(setSearchText(text)),
-    setRecentPoAll: bool => dispatch(setRecentPoAll(bool)),
-    fetchRecentPo: () => dispatch(fetchRecentPo()),
-    fetchPo: () => dispatch(fetchPo())
-
-})
-
-export default withRouter(connect(mapStateToProps, mapDispatchToProps)(RecentPo))
+export default withRouter(RecentPo)

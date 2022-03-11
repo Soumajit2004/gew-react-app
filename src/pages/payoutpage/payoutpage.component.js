@@ -7,7 +7,6 @@ import PayoutMain from "../../components/payout-main/payoutMain.component";
 import PaymentHistory from "../../components/payment-history/paymentHistory.component";
 
 const PayoutPage = () => {
-
     const [tabIndex, setTabIndex] = useState("1")
 
     return <HeaderComponent title="Payouts">
