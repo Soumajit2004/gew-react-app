@@ -18,12 +18,11 @@ import {
     Edit,
     MenuOutlined,
 } from "@mui/icons-material";
-
 import {DataGrid} from "@mui/x-data-grid";
 import {parseDate} from "../../utilils/functions.utilis";
-import {connect} from "react-redux";
-import {selectPoData, selectPoSearch} from "../../redux/po/po.selectors.";
-import {deletePo, downloadPo, fetchPo, setAddMode, setEditMode, setSearchText} from "../../redux/po/po.actions.";
+import {useDispatch, useSelector} from "react-redux";
+import {selectIsPoFetching, selectPoData} from "../../redux/po/po.selectors.";
+import {deletePo, downloadPo, setEditMode,} from "../../redux/po/po.actions.";
 import LoadingSpinner from "../withSpinner/isLoadingSpinner";
 import PoSearch from "../po-search/poSearch.component";
 
@@ -34,28 +33,24 @@ const columns = [
     {field: 'unit', headerName: 'Unit', width: 90},
 ];
 
-const PoViewBody = ({
-                        poData: {
-                            poNumber,
-                            material,
-                            issueNo,
-                            issueDate,
-                            poDate,
-                            description,
-                            lastEditedBy,
-                            lastEditedTime
-                        },
-                        setEditMode,
-                        downloadPo,
-                        deletePo,
-                        isFetching
-                    }) => {
-    const rows = []
-    let counter = 0
-
-    //////////////
-
+const PoViewBody = () => {
     const [anchorEl, setAnchorEl] = React.useState(null);
+    const [detailsOpen, setDetailsOpen] = React.useState(false);
+
+    const {
+        poNumber,
+        material,
+        issueNo,
+        issueDate,
+        poDate,
+        description,
+        lastEditedBy,
+        lastEditedTime
+    } = useSelector(selectPoData)
+    const isFetching = useSelector(selectIsPoFetching)
+
+    const dispatch = useDispatch()
+
     const open = Boolean(anchorEl);
     const handleMenuClick = (event) => {
         setAnchorEl(event.currentTarget);
@@ -63,27 +58,25 @@ const PoViewBody = ({
     const handleMenuClose = () => {
         setAnchorEl(null);
     };
-
-    ///////////////
-
-    const [detailsOpen, setDetailsOpen] = React.useState(false);
-
     const handleClickOpen = () => {
         setDetailsOpen(true);
     };
-
     const handleDetailsClose = () => {
         setDetailsOpen(false);
     };
 
-    ////////////////
-
-    for (let key in material) {
-        counter++
-        rows.push({
-            id: counter, matName: key, quantity: material[key][0], unit: material[key][1]
-        })
+    const getRows = () => {
+        let r = []
+        let counter = 0
+        for (let key in material) {
+            counter++
+            r.push({
+                id: counter, matName: key, quantity: material[key][0], unit: material[key][1]
+            })
+        }
+        return r
     }
+    const rows = getRows()
 
     return <Stack spacing={2}>
         <Dialog
@@ -122,7 +115,7 @@ const PoViewBody = ({
                                 <div style={{display: "flex", alignItems: "center", gap: "20px"}}>
                                     <Button variant="contained" startIcon={<Edit/>} style={{height: 40}}
                                             onClick={() => {
-                                                setEditMode(true)
+                                                dispatch(setEditMode(true))
                                             }}>
                                         Edit
                                     </Button>
@@ -143,13 +136,13 @@ const PoViewBody = ({
                                             onClose={handleMenuClose}
                                         >
                                             <MenuItem
-                                                onClick={async () => {
+                                                onClick={() => {
                                                     handleMenuClose()
-                                                    deletePo()
+                                                    dispatch(deletePo())
                                                 }}>Delete</MenuItem>
 
                                             <MenuItem onClick={() => {
-                                                downloadPo()
+                                                dispatch(downloadPo())
                                                 handleMenuClose()
                                             }}>
                                                 Download
@@ -238,18 +231,4 @@ const PoViewBody = ({
     </Stack>
 }
 
-const mapStateToProps = (state) => ({
-    poData: selectPoData(state),
-    searchText: selectPoSearch(state),
-})
-
-const mapDispatchToProps = dispatch => ({
-    fetchPo: () => dispatch(fetchPo()),
-    downloadPo: () => dispatch(downloadPo()),
-    deletePo: () => dispatch(deletePo()),
-    setSearchText: text => dispatch(setSearchText(text)),
-    setEditMode: bool => dispatch(setEditMode(bool)),
-    setAddMode: bool => dispatch(setAddMode(bool))
-})
-
-export default connect(mapStateToProps, mapDispatchToProps)(PoViewBody)
+export default PoViewBody

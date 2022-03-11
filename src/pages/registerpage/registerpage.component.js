@@ -17,21 +17,22 @@ import {createUserWithPhone, db} from "../../firebase/firebase.utils";
 import {collection, doc, getDocs, query, setDoc, where} from "firebase/firestore";
 import {CurrencyRupee} from "@mui/icons-material";
 import IsLoadingSpinner from "../../components/withSpinner/isLoadingSpinner";
-import {connect} from "react-redux";
+import {useDispatch} from "react-redux";
 import {showMessage} from "../../redux/snackbar/snackbar.actions";
 import isMobilePhone from "validator/es/lib/isMobilePhone";
 
-const RegisterPage = ({showMessage}) => {
-
+const RegisterPage = () => {
     const [isLoading, setLoading] = useState(false)
     const [isPhoneAuth, setPhoneAuth] = useState(true)
     const [auth, setAuth] = useState("phone")
     const [role, setRole] = useState("office")
 
+    const dispatch = useDispatch()
+    const showMessageHandler = (message) => {dispatch(showMessage(message))}
+
     const firestoreRegister = async (uid, formData) => {
         try {
             const userRef = doc(db, "users", uid)
-
             await setDoc(userRef, {
                 name: formData.get("name"),
                 phoneNumber: `+91${formData.get("phNo")}`,
@@ -41,10 +42,9 @@ const RegisterPage = ({showMessage}) => {
                 role: formData.get("role"),
                 authMethod: formData.get("auth")
             })
-
-            showMessage("User Created !")
+            showMessageHandler("User Created !")
         } catch (e) {
-            showMessage(e.message)
+            showMessageHandler(e.message)
         }
     }
 
@@ -52,7 +52,7 @@ const RegisterPage = ({showMessage}) => {
         if (isMobilePhone(formData.get("phNo")) && (formData.get("accNo").toString() === formData.get("accNoC").toString())) {
             return true
         } else {
-            showMessage("Invalid Data")
+            showMessageHandler("Invalid Data")
             return false
         }
     }
@@ -69,38 +69,32 @@ const RegisterPage = ({showMessage}) => {
 
             const usersDB = await getDocs(query(collection(db, "users"), where("phoneNumber", "==", parsedPhNo)))
             if (usersDB.size > 0) {
-                showMessage("Duplicate Phone Number !")
+                showMessageHandler("Duplicate Phone Number !")
             } else {
                 if (isPhoneAuth) {
                     try {
                         const phoneUser = await createUserWithPhone({phoneNumber: parsedPhNo})
-
                         await firestoreRegister(phoneUser.data.uid, data)
-
-                        showMessage("User Created !")
+                        showMessageHandler("User Created !")
                     } catch (e) {
-                        showMessage("Failed to create user !")
+                        showMessageHandler("Failed to create user !")
                     }
                 } else {
                     try {
                         const user = await createUserWithEmailAndPassword(auth, data.get("email"), data.get("password"))
-
                         await firestoreRegister(user.user.uid, data)
                     } catch (e) {
-                        showMessage("Failed to create user !")
+                        showMessageHandler("Failed to create user !")
                     }
                 }
             }
             setLoading(false)
         }
-
     }
 
 
-    return (
-        <HeaderComponent title="Register">
+    return (<HeaderComponent title="Register">
             <Container style={{height: "80vh"}}>
-
                 <Stack spacing={4}>
                     <Typography variant="h2" fontWeight={500} align="center">Register</Typography>
                     {
@@ -256,14 +250,9 @@ const RegisterPage = ({showMessage}) => {
                     }
                 </Stack>
             </Container>
-        </HeaderComponent>
-    );
+        </HeaderComponent>);
 
 
 }
 
-const mapDispatchToProp = dispatch => ({
-    showMessage: message => dispatch(showMessage(message))
-})
-
-export default connect(null, mapDispatchToProp)(RegisterPage)
+export default RegisterPage

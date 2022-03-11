@@ -20,13 +20,15 @@ import isEmail from "validator/es/lib/isEmail";
 import isMobilePhone from "validator/es/lib/isMobilePhone";
 import {collection, getDocs, query, where} from "firebase/firestore";
 import {showMessage} from "../../redux/snackbar/snackbar.actions";
-import {connect} from "react-redux";
+import {useDispatch} from "react-redux";
 
-const SignInForm = ({showMessage}) => {
-
+const SignInForm = () => {
     const [isDialogOpen, setDialogOpen] = useState(false)
     const [otp, setOTP] = useState("")
     const [isRecaptchaReady, setRecaptchaReady] = useState(false)
+
+    const dispatch = useDispatch()
+    const showMessageHandler = msg => {dispatch(showMessage(msg))}
 
     const recaptchaVerifier = () => {
         if (!isRecaptchaReady) {
@@ -42,7 +44,7 @@ const SignInForm = ({showMessage}) => {
             window.otpVerifier.confirm(otp)
             setDialogOpen(false)
         } catch (e) {
-            showMessage(e.message)
+            showMessageHandler(e.message)
         }
     }
 
@@ -70,7 +72,7 @@ const SignInForm = ({showMessage}) => {
                 throw Error("Invalid Data")
             }
         } catch (e) {
-            showMessage(e.message)
+            showMessageHandler(e.message)
         }
     };
 
@@ -183,8 +185,4 @@ const SignInForm = ({showMessage}) => {
     )
 }
 
-const mapDispatchToProp = dispatch => ({
-    showMessage: message => dispatch(showMessage(message))
-})
-
-export default connect(null, mapDispatchToProp)(SignInForm)
+export default SignInForm

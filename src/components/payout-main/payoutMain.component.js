@@ -54,7 +54,7 @@ const PayoutMain = () => {
     const userRows = useSelector(selectUsersRows)
 
     const dispatch = useDispatch()
-    const showMessageHandler = () => dispatch(showMessage())
+    const showMessageHandler = (msg) => dispatch(showMessage(msg))
     const fetchUsersHandler = () => dispatch(fetchUsers())
 
     useEffect(() => {
