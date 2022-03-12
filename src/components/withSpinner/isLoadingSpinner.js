@@ -5,13 +5,12 @@ const LoadingSpinner = () => {
     return <div
         style={{
             width: "100%",
-            height:"80%",
+            height:"100%",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            paddingTop:"20px"
         }}>
-        <CircularProgress color="primary"/>
+        <CircularProgress color="primary" size={50}/>
     </div>
 }
 

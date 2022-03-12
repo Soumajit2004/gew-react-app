@@ -13,6 +13,7 @@ import {
 } from "@mui/material";
 import Box from "@mui/material/Box";
 import {createUserWithEmailAndPassword} from "firebase/auth";
+import {auth} from "../../firebase/firebase.utils";
 import {createUserWithPhone, db} from "../../firebase/firebase.utils";
 import {collection, doc, getDocs, query, setDoc, where} from "firebase/firestore";
 import {CurrencyRupee} from "@mui/icons-material";
@@ -24,7 +25,7 @@ import isMobilePhone from "validator/es/lib/isMobilePhone";
 const RegisterPage = () => {
     const [isLoading, setLoading] = useState(false)
     const [isPhoneAuth, setPhoneAuth] = useState(true)
-    const [auth, setAuth] = useState("phone")
+    const [pAuth, setPAuth] = useState("phone")
     const [role, setRole] = useState("office")
 
     const dispatch = useDispatch()
@@ -77,14 +78,14 @@ const RegisterPage = () => {
                         await firestoreRegister(phoneUser.data.uid, data)
                         showMessageHandler("User Created !")
                     } catch (e) {
-                        showMessageHandler("Failed to create user !")
+                        showMessageHandler(e.message)
                     }
                 } else {
                     try {
                         const user = await createUserWithEmailAndPassword(auth, data.get("email"), data.get("password"))
                         await firestoreRegister(user.user.uid, data)
                     } catch (e) {
-                        showMessageHandler("Failed to create user !")
+                        showMessageHandler(e.message)
                     }
                 }
             }
@@ -176,9 +177,9 @@ const RegisterPage = () => {
                                                                     labelId="auth-method"
                                                                     name="auth"
                                                                     required
-                                                                    value={auth}
+                                                                    value={pAuth}
                                                                     onChange={(v) => {
-                                                                        setAuth(v.target.value)
+                                                                        setPAuth(v.target.value)
                                                                         v.target.value === "phone" ? setPhoneAuth(true) : setPhoneAuth(false)
                                                                     }}
                                                                 >

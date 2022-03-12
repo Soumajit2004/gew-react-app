@@ -50,26 +50,24 @@ const SignInForm = () => {
 
     const handleSubmit = async (event) => {
         event.preventDefault()
-
         try {
             const data = new FormData(event.currentTarget)
-            const email = data.get("email"), password = data.get("password"), phoneNumber = data.get("phoneNumber")
+            const email = data.get("email"), password = data.get("password"), phoneNumber = data.get("phNo")
 
             if (isEmail(email) && password) {
                 await signInWithEmailAndPassword(auth, email, password)
             } else if (isMobilePhone(phoneNumber)) {
                 const response = await getDocs(query(collection(db, "users"), where("phoneNumber", "==", `+91${phoneNumber}`)))
-
-                const user = response.docs[0].data() | ""
+                const user = response.docs[0].data()
 
                 if (user.phoneNumber === `+91${phoneNumber}` && user.authMethod === `phone`) {
                     recaptchaVerifier()
                     const appVerifier = window.recaptchaVerifier;
                     window.otpVerifier = await signInWithPhoneNumber(auth, `+91${phoneNumber}`, appVerifier)
                     setDialogOpen(true)
+                }else{
+                    throw Error("Check your auth method or phone number")
                 }
-            } else {
-                throw Error("Invalid Data")
             }
         } catch (e) {
             showMessageHandler(e.message)
@@ -123,7 +121,6 @@ const SignInForm = () => {
         >
             <div id='recaptcha-container'/>
             <OTPDialog/>
-
             <Typography component="h2" variant="h2" fontWeight={600}>
                 Sign in
             </Typography>
@@ -151,12 +148,12 @@ const SignInForm = () => {
                 <TextField
                     margin="normal"
                     fullWidth
-                    name="phoneNumber"
+                    name="phNo"
                     label="Phone Number"
                     InputProps={{
                         startAdornment: <InputAdornment position="start">+91</InputAdornment>,
                     }}
-                    id="phoneNumber"
+                    id="phNo"
                     type="number"
                 />
                 <Button

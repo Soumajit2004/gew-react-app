@@ -1,93 +1,74 @@
-import React, {lazy, Suspense} from "react";
+import React, {lazy, Suspense, useEffect} from "react";
 import "./App.css"
 import {Redirect, Route, Switch} from "react-router";
-import {connect} from "react-redux";
+import {useDispatch, useSelector} from "react-redux";
 import {auth, db} from "./firebase/firebase.utils";
 import {selectCurrentUser} from "./redux/user/user.selector";
 import {setCurrentUser} from "./redux/user/user.actions";
 import {doc, getDoc} from "firebase/firestore";
-import {withRouter} from "react-router-dom";
 import IsLoadingSpinner from "./components/withSpinner/isLoadingSpinner";
 import ErrorBoundary from "./components/error-bondary/error-boundry.componenet";
 import CustomSnackBar from "./components/snackbar/snackbar.component";
+import UserManagementPage from "./pages/employeeMngPage/employeeManagementPage.component";
 
 const HomePage = lazy(() => import("./pages/homepage/homepage.component"))
 const SignInPage = lazy(() => import("./pages/signinpage/signinpage.component"))
 const DashboardPage = lazy(() => import("./pages/dashboardpage/dashboardpage.component"))
 const PoPage = lazy(() => import("./pages/popage/popage.component"))
 const RegisterPage = lazy(() => import("./pages/registerpage/registerpage.component"))
-const PayoutPage = lazy(()=>import("./pages/payoutpage/payoutpage.component"))
+const PayoutPage = lazy(() => import("./pages/payoutpage/payoutpage.component"))
 
-// eslint-disable-next-line no-undef
-class App extends React.Component {
-    unsubscribeFromAuth = null;
+const App = () => {
+    const currentUser = useSelector(selectCurrentUser)
+    const dispatch = useDispatch()
 
-    componentDidMount() {
-        const {setCurrentUser} = this.props
-
-        this.unsubscribeFromAuth = auth.onAuthStateChanged(user => {
+    useEffect(() => {
+        return auth.onAuthStateChanged(user => {
             if (user) {
-                const userRef = doc(db, "users", user.uid);
-                getDoc(userRef)
+                getDoc(doc(db, "users", user.uid))
                     .then((r) => {
-                        setCurrentUser({...user, ...r.data()})
+                        dispatch(setCurrentUser({...user, ...r.data()}))
                     })
             } else {
-                setCurrentUser(user)
+                dispatch(setCurrentUser(user))
             }
-
         })
-    }
+    }, [])
 
-    componentWillUnmount() {
-        this.unsubscribeFromAuth()
-    }
-
-    getUserRole() {
-        const {currentUser} = this.props
-        try{
+    const getUserRole = () => {
+        try {
             return currentUser.role
-        }catch (e) {
+        } catch (e) {
             return ""
         }
     }
 
-    render() {
-        const {currentUser} = this.props
-
-        return (
-            <div className="App" id="app">
-                <CustomSnackBar/>
-                <Switch>
-                    <ErrorBoundary>
-                        <Suspense fallback={<IsLoadingSpinner/>}>
-                            <Route exact path="/" component={HomePage}/>
-                            <Route exact path="/sign-in"
-                                   render={() => currentUser ? <Redirect to="/dashboard"/> : <SignInPage/>}/>
-                            <Route exact path="/dashboard"
-                                   render={() => currentUser ? <DashboardPage/> : <Redirect to="/sign-in"/>}/>
-                            <Route exact path="/po-manager"
-                                   render={() => currentUser ? (<PoPage/>) : (<Redirect to="/sign-in"/>)}/>
-                            <Route exact path="/register"
-                                   render={() => currentUser ? (<RegisterPage/>) : (<Redirect to="/sign-in"/>)}/>
-                            <Route exact path="/payouts"
-                                   render={() => (this.getUserRole() === "owner") ? (<PayoutPage/>) : (<Redirect to="/sign-in"/>)}/>
-                        </Suspense>
-                    </ErrorBoundary>
-                </Switch>
-            </div>
-        );
-    }
-
-
+    return (
+        <div className="App" id="app">
+            <CustomSnackBar/>
+            <Switch>
+                <ErrorBoundary>
+                    <Suspense fallback={<IsLoadingSpinner/>}>
+                        <Route exact path="/" component={HomePage}/>
+                        <Route exact path="/sign-in"
+                               render={() => currentUser ? <Redirect to="/dashboard"/> : <SignInPage/>}/>
+                        <Route exact path="/dashboard"
+                               render={() => currentUser ? <DashboardPage/> : <Redirect to="/sign-in"/>}/>
+                        <Route exact path="/po-manager"
+                               render={() => currentUser ? (<PoPage/>) : (<Redirect to="/sign-in"/>)}/>
+                        <Route exact path="/register"
+                               render={() => currentUser ? (<RegisterPage/>) : (<Redirect to="/sign-in"/>)}/>
+                        <Route exact path="/payouts"
+                               render={() => (getUserRole() === "owner") ? (<PayoutPage/>) : (
+                                   <Redirect to="/sign-in"/>)}/>
+                        <Route exact path="/employee"
+                               render={() => (getUserRole() === "owner") ? (<UserManagementPage/>) : (
+                                   <Redirect to="/sign-in"/>)}/>
+                    </Suspense>
+                </ErrorBoundary>
+            </Switch>
+        </div>
+    );
 }
 
-const mapStateToProps = (state) => ({
-    currentUser: selectCurrentUser(state),
-})
-
-const mapDispatchToProp = dispatch => ({
-    setCurrentUser: user => dispatch(setCurrentUser(user))
-})
-
-export default withRouter(connect(mapStateToProps, mapDispatchToProp)(App));
+export default App

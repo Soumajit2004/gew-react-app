@@ -18,11 +18,10 @@ import ListItemText from '@mui/material/ListItemText';
 import {
     AccountCircle,
     AppRegistration,
-    Dashboard,
+    Dashboard, Group,
     Logout,
     Pages,
     Payment,
-    VerifiedUserRounded
 } from "@mui/icons-material";
 import {withRouter} from "react-router";
 import {auth} from "../../firebase/firebase.utils";
@@ -100,6 +99,10 @@ const HeaderComponent = ({title, children, history, currentUser}) => {
             .then(() => redirectTo("/sign-in"))
     }
 
+    const OnOwner = ({children}) => {
+        return (currentUser.role === "owner") ? children : <div/>
+    }
+
     return (
         <Fade in>
             <Box sx={{display: 'flex'}}>
@@ -160,18 +163,26 @@ const HeaderComponent = ({title, children, history, currentUser}) => {
                             </ListItemIcon>
                             <ListItemText primary="P.O Manager"/>
                         </ListItem>
-                        {
-                            (currentUser.role === "owner") ? (
-                                <ListItem button key={3} onClick={() => {
-                                    redirectTo("/payouts")
-                                }}>
-                                    <ListItemIcon>
-                                        <Payment/>
-                                    </ListItemIcon>
-                                    <ListItemText primary="Payouts"/>
-                                </ListItem>
-                            ) : <div/>
-                        }
+                        <OnOwner>
+                            <ListItem button key={3} onClick={() => {
+                                redirectTo("/payouts")
+                            }}>
+                                <ListItemIcon>
+                                    <Payment/>
+                                </ListItemIcon>
+                                <ListItemText primary="Payouts"/>
+                            </ListItem>
+                        </OnOwner>
+                        <OnOwner>
+                            <ListItem button key={4} onClick={() => {
+                                redirectTo("/employee")
+                            }}>
+                                <ListItemIcon>
+                                    <Group/>
+                                </ListItemIcon>
+                                <ListItemText primary="Employee"/>
+                            </ListItem>
+                        </OnOwner>
                     </List>
                     <Divider/>
                     <List>
@@ -181,9 +192,6 @@ const HeaderComponent = ({title, children, history, currentUser}) => {
                             </ListItemIcon>
                             <ListItemText primary="Register"/>
                         </ListItem>
-                    </List>
-                    <Divider/>
-                    <List>
                         <ListItem button key={5} onClick={signOut}>
                             <ListItemIcon>
                                 <Logout/>

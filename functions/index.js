@@ -257,6 +257,48 @@ exports.payUsers = functions
         }
     })
 
+exports.deleteUser = functions
+    .runWith({
+        timeoutSeconds: 180,
+        memory: "128MB"
+    })
+    .region("asia-south1")
+    .https.onCall((d, context) => {
+        const {id, razorpayContact, razorpayFund} = d
+        console.log(d)
+        if (context.auth) {
+            const configData = {
+                "active": false
+            }
+            const config = {
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                auth: razorPayAuth,
+            }
+
+            return axios.patch(`https://api.razorpay.com/v1/contacts/${razorpayContact}`, configData, config)
+                .then((r) => {
+                    return axios.patch(`https://api.razorpay.com/v1/fund_accounts/${razorpayFund}`, configData, config)
+                })
+                .catch((e)=>{
+                    console.log(e.message)
+                })
+                .then((r) => {
+                    return auth.deleteUser(id)
+                })
+                .then((r) => {
+                    return db.collection('users').doc(id).delete()
+                })
+                .then((r) => {
+                    return {status: "Success"}
+                })
+                .catch(e => {
+                    return {status: e.message}
+                })
+        }
+    })
+
 ///////////////////////////// Scheduled Functions //////////////////////////////////
 
 exports.deletePoDownloads = functions
@@ -392,7 +434,7 @@ hooksExpressApp.post("/", async (req, res) => {
         } catch (e) {
             res.send({status: "error"})
         }
-    }else {
+    } else {
         res.send({status: "error"})
     }
 })
