@@ -2,7 +2,8 @@ import {SnackbarActionTypes} from "./snackbar.types";
 
 const INITIAL_STATE = {
     open: false,
-    message: ""
+    message: "",
+    mode: ""
 }
 
 const snackbarReducer = (state = INITIAL_STATE, action) => {
@@ -11,7 +12,8 @@ const snackbarReducer = (state = INITIAL_STATE, action) => {
             return {
                 ...state,
                 open: true,
-                message: action.payload
+                message: action.payload,
+                mode: action.mode
             }
         case SnackbarActionTypes.CLOSE_SNACKBAR:
             return {

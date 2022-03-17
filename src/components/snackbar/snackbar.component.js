@@ -1,38 +1,41 @@
 import {IconButton, Snackbar} from "@mui/material";
 import React from "react";
 import {Close} from "@mui/icons-material";
-import {selectSnackbarMessage, selectSnackbarOpen} from "../../redux/snackbar/snackbar.selectors";
-import {connect} from "react-redux";
+import {selectSnackbarMessage, selectSnackbarMode, selectSnackbarOpen} from "../../redux/snackbar/snackbar.selectors";
+import {useDispatch, useSelector} from "react-redux";
 import {closeSnackbar} from "../../redux/snackbar/snackbar.actions";
+import {Alert} from "@mui/lab";
 
-const CustomSnackBar = ({isSnackbarOpen, snackbarMessage, closeSnackbar}) => {
+const CustomSnackBar = () => {
+    const isSnackbarOpen = useSelector(selectSnackbarOpen)
+    const snackbarMessage = useSelector(selectSnackbarMessage)
+    const mode = useSelector(selectSnackbarMode)
+
+    const dispatch = useDispatch()
+    const closeSnackbarHandler = () => {
+        dispatch(closeSnackbar())
+    }
 
     const snackbarAction = (
-        <IconButton color="secondary" onClick={closeSnackbar}>
+        <IconButton color="secondary" onClick={closeSnackbarHandler}>
             <Close/>
         </IconButton>
     )
 
-    const anchor = {vertical:"bottom", horizontal:"center"}
+    const anchor = {vertical: "bottom", horizontal: "center"}
 
     return (
         <Snackbar open={isSnackbarOpen}
                   action={snackbarAction}
                   anchorOrigin={anchor}
                   autoHideDuration={3000}
-                  message={snackbarMessage}
-                  onClose={closeSnackbar}
-        />
+                  onClose={closeSnackbarHandler}
+        >
+            <Alert onClose={closeSnackbarHandler} severity={mode} sx={{width: '100%'}}>
+                {snackbarMessage.toString()}
+            </Alert>
+        </Snackbar>
     )
 }
 
-const mapStateToProps = (state) => ({
-    isSnackbarOpen: selectSnackbarOpen(state),
-    snackbarMessage: selectSnackbarMessage(state)
-})
-
-const mapDispatchToProp = dispatch => ({
-    closeSnackbar: () => dispatch(closeSnackbar())
-})
-
-export default React.memo(connect(mapStateToProps, mapDispatchToProp)(CustomSnackBar))
+export default CustomSnackBar

@@ -30,8 +30,7 @@ export function* fetchPoAsync() {
             throw Error("PO not found")
         }
     } catch (e) {
-        console.log(e)
-        yield put(showMessage(e.message))
+        yield put(showMessage(e.message, "error"))
         yield put(fetchPoFailure())
     }
 }
@@ -90,9 +89,8 @@ export function* savePoAsync({
             lastEditedTime: Timestamp.fromDate(new Date())
         }))
     } catch (e) {
-        console.log(e.message)
         yield put(savePoFailure())
-        yield put(showMessage(e.message))
+        yield put(showMessage(e.message, "error"))
     }
 
 }

@@ -33,7 +33,7 @@ const App = () => {
                 dispatch(setCurrentUser(user))
             }
         })
-    }, [])
+    }, [dispatch])
 
     const getUserRole = () => {
         try {

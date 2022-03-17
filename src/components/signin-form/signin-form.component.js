@@ -28,7 +28,7 @@ const SignInForm = () => {
     const [isRecaptchaReady, setRecaptchaReady] = useState(false)
 
     const dispatch = useDispatch()
-    const showMessageHandler = msg => {dispatch(showMessage(msg))}
+    const showMessageHandler = (msg, mode) => {dispatch(showMessage(msg, mode))}
 
     const recaptchaVerifier = () => {
         if (!isRecaptchaReady) {
@@ -44,7 +44,7 @@ const SignInForm = () => {
             window.otpVerifier.confirm(otp)
             setDialogOpen(false)
         } catch (e) {
-            showMessageHandler(e.message)
+            showMessageHandler(e.message, "error")
         }
     }
 
@@ -70,7 +70,7 @@ const SignInForm = () => {
                 }
             }
         } catch (e) {
-            showMessageHandler(e.message)
+            showMessageHandler(e.message, "error")
         }
     };
 

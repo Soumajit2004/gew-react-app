@@ -217,7 +217,7 @@ exports.payUsers = functions
     })
     .region("asia-south1")
     .https.onCall((d, context) => {
-        const {id} = d
+        const {id, amount} = d
 
         if (context.auth) {
             return db.collection("users").doc(id).get()
@@ -227,7 +227,7 @@ exports.payUsers = functions
                     const configData = JSON.stringify({
                         "account_number": "2323230065575310",
                         "fund_account_id": data.razorpayFund,
-                        "amount": parseInt(data.salary) * 100,
+                        "amount": (amount ? parseInt(amount) : parseInt(data.salary)) * 100,
                         "currency": "INR",
                         "mode": "IMPS",
                         "purpose": "salary",

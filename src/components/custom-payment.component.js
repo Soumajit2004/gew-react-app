@@ -1,28 +1,27 @@
 import React, {useEffect, useState} from "react";
-import {payUserFnc} from "../../firebase/firebase.utils";
-import {DataGrid} from "@mui/x-data-grid";
-import LoadingSpinner from "../withSpinner/isLoadingSpinner";
-import {showMessage} from "../../redux/snackbar/snackbar.actions";
+import {CurrencyRupee, RefreshOutlined} from "@mui/icons-material";
+import {useDispatch, useSelector} from "react-redux";
+import {selectIsUsersFetching, selectUsersRows} from "../redux/user/user.selector";
+import {showMessage} from "../redux/snackbar/snackbar.actions";
+import {fetchUsers} from "../redux/user/user.actions";
+import {payUserFnc} from "../firebase/firebase.utils";
 import {
-    Button, CircularProgress,
-    Container,
-    Dialog, DialogActions,
+    Button,
+    CircularProgress, Container,
+    Dialog,
+    DialogActions,
     DialogContent,
     DialogContentText,
-    DialogTitle,
-    Fade,
-    Stack,
-    Typography
+    DialogTitle, Fade, InputAdornment,
+    Stack, TextField, Typography
 } from "@mui/material";
-import {useDispatch, useSelector} from "react-redux";
+import LoadingSpinner from "./withSpinner/isLoadingSpinner";
 import Divider from "@mui/material/Divider";
-import {RefreshOutlined} from "@mui/icons-material";
-import {fetchUsers} from "../../redux/user/user.actions";
-import {selectIsUsersFetching, selectUsersRows} from "../../redux/user/user.selector";
+import {DataGrid} from "@mui/x-data-grid";
 
-
-const PayoutMain = () => {
+const CustomPayout = () => {
     const [selections, setSelections] = useState([])
+    const [amount, setAmount] = useState(0)
     const [confDialog, setConfDialog] = useState(false)
     const [isPaying, setIsPaying] = useState(false)
     const columns = [
@@ -41,14 +40,14 @@ const PayoutMain = () => {
 
     useEffect(() => {
         userRows.length > 0 ? console.log("Users Fetched!") : fetchUsersHandler()
-    }, [])
+    }, [dispatch])
 
     const handlePay = async () => {
         if (selections.length > 0) {
             setIsPaying(true)
             for (let e of selections) {
                 try {
-                    await payUserFnc({id: e.toString()})
+                    await payUserFnc({id: e.toString(), amount: amount})
                 } catch (er) {
                     showMessageHandler(er.message, "error")
                 }
@@ -66,12 +65,10 @@ const PayoutMain = () => {
                 for (let i in userRows) {
                     i = userRows[i]
                     if (i.id === selections[e]) {
-                        totalAmount += parseInt(i.salary)
-
+                        totalAmount += parseInt(amount)
                         if (i.lastPayedDate) {
                             let diff = Math.abs(new Date() - new Date(i.lastPayedDate))
                             diff = diff / (1000 * 3600 * 24)
-
                             diff < 28 ? recentlyPaidNames.push(i.name) : console.log("ok")
                         }
                     }
@@ -137,13 +134,18 @@ const PayoutMain = () => {
                     <Stack height="100%" spacing={2} divider={<Divider/>}>
                         <Stack spacing={1}>
                             <Stack direction="row" style={{justifyContent: "space-between", alignItems: "center"}}>
-                                <Typography
-                                    variant="h5">{selections.length > 0 ? `${selections.length} User Selected` : "Select users to pay"}</Typography>
+                                <TextField label="Enter Amount" variant="filled" type="number"
+                                           size="small"
+                                           InputProps={{
+                                               startAdornment: <InputAdornment position="start"><CurrencyRupee/></InputAdornment>,
+                                           }}
+                                           onChange={(e)=>{setAmount(e.target.value)}}
+                                />
                                 <Stack direction="row" spacing={2}>
                                     <Button variant="contained" onClick={() => {
                                         setConfDialog(true)
                                     }}
-                                            disabled={selections.length === 0}>Pay Salary</Button>
+                                            disabled={selections.length < 1 || amount < 1}>Pay</Button>
                                     <Button variant="outlined" onClick={fetchUsersHandler}>
                                         <RefreshOutlined/>
                                     </Button>
@@ -165,4 +167,4 @@ const PayoutMain = () => {
     </Container>
 }
 
-export default PayoutMain
+export default CustomPayout

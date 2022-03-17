@@ -26,7 +26,7 @@ export function* fetchUsersAsync() {
 
         yield put(fetchUsersSuccess(userQuery.docs, filteredRows))
     } catch (e) {
-       yield  put(showMessage(e.message))
+       yield  put(showMessage(e.message, "error"))
     }
 }
 

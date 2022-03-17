@@ -13,7 +13,7 @@ import {
 import {DataGrid} from "@mui/x-data-grid";
 import {useDispatch, useSelector} from "react-redux";
 import {selectIsUsersFetching, selectUsersRows} from "../../redux/user/user.selector";
-import {CurrencyRupee, Edit} from "@mui/icons-material";
+import {CurrencyRupee} from "@mui/icons-material";
 import {showMessage} from "../../redux/snackbar/snackbar.actions";
 import {fetchUsers} from "../../redux/user/user.actions";
 import Box from "@mui/material/Box";
@@ -38,7 +38,7 @@ const UserManagementPage = () => {
     const isFetching = useSelector(selectIsUsersFetching)
 
     const dispatch = useDispatch()
-    const showMessageHandler = (msg) => dispatch(showMessage(msg))
+    const showMessageHandler = (msg, mode) => dispatch(showMessage(msg, mode))
     const fetchUsersHandler = () => dispatch(fetchUsers())
 
     useEffect(() => {
@@ -57,10 +57,10 @@ const UserManagementPage = () => {
                 await setDoc(doc(db, "users", data.id), {
                     salary: formData.get("salary")
                 }, {merge: true})
-                showMessageHandler("Employee details updated")
+                showMessageHandler("Employee details updated", "success")
                 fetchUsersHandler()
             } catch (e) {
-                showMessageHandler(e.message)
+                showMessageHandler(e.message, "error")
             }
         }
 
@@ -96,7 +96,7 @@ const UserManagementPage = () => {
                     <Button onClick={async () => {
                         await deleteUserFnc(data)
                         setDialogOpen(false)
-                        showMessageHandler("User Deleted")
+                        showMessageHandler("User Deleted", "success")
                     }}>Delete</Button>
                     <Button onClick={() => {
                         setDialogOpen(false)

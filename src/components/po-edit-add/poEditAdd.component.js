@@ -78,7 +78,7 @@ class PoEditAdd extends React.Component {
         if (this.validateFields()) {
             savePo(this.state)
         } else {
-            showMessage("Invalid Data")
+            showMessage("Invalid Data", "error")
         }
     }
 
@@ -255,7 +255,7 @@ const mapDispatchToProps = dispatch => ({
     setEditMode: () => dispatch(setEditMode()),
     setAddMode: () => dispatch(setAddMode()),
     savePo: data => dispatch(savePo(data)),
-    showMessage: message => dispatch(showMessage(message))
+    showMessage: (message, mode) => dispatch(showMessage(message, mode))
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(PoEditAdd)

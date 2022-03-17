@@ -1,9 +1,10 @@
 import {SnackbarActionTypes} from "./snackbar.types";
 
-export const showMessage = (message) => {
+export const showMessage = (message, mode) => {
     return {
         type: SnackbarActionTypes.SHOW_MESSAGE,
-        payload: message.toString()
+        payload: message.toString(),
+        mode: mode
     }
 }
 

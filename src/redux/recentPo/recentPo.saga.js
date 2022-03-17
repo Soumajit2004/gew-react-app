@@ -15,7 +15,7 @@ export function* fetchRecentPoAsync() {
 
         yield put(fetchRecentPoSuccess(data))
     } catch (e) {
-        yield put(showMessage(e.message))
+        yield put(showMessage(e.message, "error"))
     }
 }
 

@@ -29,7 +29,7 @@ const RegisterPage = () => {
     const [role, setRole] = useState("office")
 
     const dispatch = useDispatch()
-    const showMessageHandler = (message) => {dispatch(showMessage(message))}
+    const showMessageHandler = (message, mode) => {dispatch(showMessage(message, mode))}
 
     const firestoreRegister = async (uid, formData) => {
         try {
@@ -43,9 +43,9 @@ const RegisterPage = () => {
                 role: formData.get("role"),
                 authMethod: formData.get("auth")
             })
-            showMessageHandler("User Created !")
+            showMessageHandler("User Created !", "success")
         } catch (e) {
-            showMessageHandler(e.message)
+            showMessageHandler(e.message, "error")
         }
     }
 
@@ -53,7 +53,7 @@ const RegisterPage = () => {
         if (isMobilePhone(formData.get("phNo")) && (formData.get("accNo").toString() === formData.get("accNoC").toString())) {
             return true
         } else {
-            showMessageHandler("Invalid Data")
+            showMessageHandler("Invalid Data", "error")
             return false
         }
     }
@@ -70,22 +70,22 @@ const RegisterPage = () => {
 
             const usersDB = await getDocs(query(collection(db, "users"), where("phoneNumber", "==", parsedPhNo)))
             if (usersDB.size > 0) {
-                showMessageHandler("Duplicate Phone Number !")
+                showMessageHandler("Duplicate Phone Number", "error")
             } else {
                 if (isPhoneAuth) {
                     try {
                         const phoneUser = await createUserWithPhone({phoneNumber: parsedPhNo})
                         await firestoreRegister(phoneUser.data.uid, data)
-                        showMessageHandler("User Created !")
+                        showMessageHandler("User Created !", "success")
                     } catch (e) {
-                        showMessageHandler(e.message)
+                        showMessageHandler(e.message, "error")
                     }
                 } else {
                     try {
                         const user = await createUserWithEmailAndPassword(auth, data.get("email"), data.get("password"))
                         await firestoreRegister(user.user.uid, data)
                     } catch (e) {
-                        showMessageHandler(e.message)
+                        showMessageHandler(e.message, "error")
                     }
                 }
             }
