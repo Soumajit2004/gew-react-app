@@ -1,8 +1,5 @@
-import React, {useEffect, useState} from "react";
-import {payUserFnc} from "../../firebase/firebase.utils";
-import {DataGrid} from "@mui/x-data-grid";
+import React, {useState} from "react";
 import LoadingSpinner from "../withSpinner/isLoadingSpinner";
-import {showMessage} from "../../redux/snackbar/snackbar.actions";
 import {
     Button, CircularProgress,
     Container,
@@ -19,44 +16,19 @@ import Divider from "@mui/material/Divider";
 import {RefreshOutlined} from "@mui/icons-material";
 import {fetchUsers} from "../../redux/user/user.actions";
 import {selectIsUsersFetching, selectUsersRows} from "../../redux/user/user.selector";
+import {payUsers} from "../../redux/payout/payout.actions";
+import {selectIsPaying, selectSelectedPayouts} from "../../redux/payout/payout.selectors";
+import PayoutTable from "../payout-table/payoutTable.component";
 
 
 const PayoutMain = () => {
-    const [selections, setSelections] = useState([])
     const [confDialog, setConfDialog] = useState(false)
-    const [isPaying, setIsPaying] = useState(false)
-    const columns = [
-        {field: 'name', headerName: 'Name', width: 250},
-        {field: 'bankAccountNumber', headerName: 'Account No', width: 250},
-        {field: 'salary', headerName: 'Salary', width: 150},
-        {field: 'lastPayedDate', headerName: 'Last Payed On', width: 400},
-    ];
 
-    const isFetching = useSelector(selectIsUsersFetching)
+    const isPaying = useSelector(selectIsPaying)
     const userRows = useSelector(selectUsersRows)
+    const selections = useSelector(selectSelectedPayouts)
 
     const dispatch = useDispatch()
-    const showMessageHandler = (msg, mode) => dispatch(showMessage(msg, mode))
-    const fetchUsersHandler = () => dispatch(fetchUsers())
-
-    useEffect(() => {
-        userRows.length > 0 ? console.log("Users Fetched!") : fetchUsersHandler()
-    }, [])
-
-    const handlePay = async () => {
-        if (selections.length > 0) {
-            setIsPaying(true)
-            for (let e of selections) {
-                try {
-                    await payUserFnc({id: e.toString()})
-                } catch (er) {
-                    showMessageHandler(er.message, "error")
-                }
-            }
-            setIsPaying(false)
-            showMessageHandler("Paid Successfully", "success")
-        }
-    }
 
     const PaymentConformationDialog = () => {
         let totalAmount = 0
@@ -81,7 +53,9 @@ const PayoutMain = () => {
 
         return <Dialog
             open={confDialog}
-            onClose={() => {setConfDialog(false)}}
+            onClose={() => {
+                setConfDialog(false)
+            }}
             aria-labelledby="alert-dialog-title"
             aria-describedby="alert-dialog-description"
         >
@@ -100,7 +74,7 @@ const PayoutMain = () => {
                 }}>Cancel</Button>
                 <Button onClick={async () => {
                     setConfDialog(false)
-                    await handlePay()
+                    dispatch(payUsers({mode: "salary", amount: undefined}))
                 }} autoFocus>
                     Pay
                 </Button>
@@ -115,7 +89,7 @@ const PayoutMain = () => {
             fullWidth={true}
         >
             <DialogContent>
-                <Stack spacing={3} style={{justifyContent:"center", alignItems:"center"}}>
+                <Stack spacing={3} style={{justifyContent: "center", alignItems: "center"}}>
                     <CircularProgress size={60}/>
                     <Typography variant="h4" fontWeight={500}>
                         Paying
@@ -131,37 +105,26 @@ const PayoutMain = () => {
     return <Container style={{height: "80vh"}}>
         <PaymentConformationDialog/>
         <PayingDialog/>
-        {
-            isFetching ? <LoadingSpinner/> :
-                (<Fade in>
-                    <Stack height="100%" spacing={2} divider={<Divider/>}>
-                        <Stack spacing={1}>
-                            <Stack direction="row" style={{justifyContent: "space-between", alignItems: "center"}}>
-                                <Typography
-                                    variant="h5">{selections.length > 0 ? `${selections.length} User Selected` : "Select users to pay"}</Typography>
-                                <Stack direction="row" spacing={2}>
-                                    <Button variant="contained" onClick={() => {
-                                        setConfDialog(true)
-                                    }}
-                                            disabled={selections.length === 0}>Pay Salary</Button>
-                                    <Button variant="outlined" onClick={fetchUsersHandler}>
-                                        <RefreshOutlined/>
-                                    </Button>
-                                </Stack>
-                            </Stack>
-                        </Stack>
-                        <DataGrid
-                            rows={userRows}
-                            columns={columns}
-                            checkboxSelection
-                            disableSelectionOnClick
-                            onSelectionModelChange={(newSelection) => {
-                                setSelections(newSelection)
+        <Fade in>
+            <Stack height="100%" spacing={2} divider={<Divider/>}>
+                <Stack spacing={1}>
+                    <Stack direction="row" style={{justifyContent: "space-between", alignItems: "center"}}>
+                        <Typography
+                            variant="h5">{selections.length > 0 ? `${selections.length} User Selected` : "Select users to pay"}</Typography>
+                        <Stack direction="row" spacing={2}>
+                            <Button variant="contained" onClick={() => {
+                                setConfDialog(true)
                             }}
-                        />
+                                    disabled={selections.length === 0}>Pay Salary</Button>
+                            <Button variant="outlined" onClick={() => dispatch(fetchUsers())}>
+                                <RefreshOutlined/>
+                            </Button>
+                        </Stack>
                     </Stack>
-                </Fade>)
-        }
+                </Stack>
+                <PayoutTable/>
+            </Stack>
+        </Fade>
     </Container>
 }
 

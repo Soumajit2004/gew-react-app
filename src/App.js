@@ -9,7 +9,6 @@ import {doc, getDoc} from "firebase/firestore";
 import IsLoadingSpinner from "./components/withSpinner/isLoadingSpinner";
 import ErrorBoundary from "./components/error-bondary/error-boundry.componenet";
 import CustomSnackBar from "./components/snackbar/snackbar.component";
-import UserManagementPage from "./pages/employeeMngPage/employeeManagementPage.component";
 
 const HomePage = lazy(() => import("./pages/homepage/homepage.component"))
 const SignInPage = lazy(() => import("./pages/signinpage/signinpage.component"))
@@ -17,6 +16,8 @@ const DashboardPage = lazy(() => import("./pages/dashboardpage/dashboardpage.com
 const PoPage = lazy(() => import("./pages/popage/popage.component"))
 const RegisterPage = lazy(() => import("./pages/registerpage/registerpage.component"))
 const PayoutPage = lazy(() => import("./pages/payoutpage/payoutpage.component"))
+const UserManagementPage = lazy(() => import("./pages/employeeMngPage/employeeManagementPage.component"))
+const UserProfilePage = lazy(()=> import("./pages/userProfilePage/userprofilePage.component"))
 
 const App = () => {
     const currentUser = useSelector(selectCurrentUser)
@@ -27,7 +28,7 @@ const App = () => {
             if (user) {
                 getDoc(doc(db, "users", user.uid))
                     .then((r) => {
-                        dispatch(setCurrentUser({...user, ...r.data()}))
+                        dispatch(setCurrentUser({id: user.uid, ...user, ...r.data()}))
                     })
             } else {
                 dispatch(setCurrentUser(user))
@@ -58,6 +59,8 @@ const App = () => {
                                render={() => currentUser ? (<PoPage/>) : (<Redirect to="/sign-in"/>)}/>
                         <Route exact path="/register"
                                render={() => currentUser ? (<RegisterPage/>) : (<Redirect to="/sign-in"/>)}/>
+                        <Route exact path="/profile"
+                               render={() => currentUser ? (<UserProfilePage/>) : (<Redirect to="/sign-in"/>)}/>
                         <Route exact path="/payouts"
                                render={() => (getUserRole() === "owner") ? (<PayoutPage/>) : (
                                    <Redirect to="/sign-in"/>)}/>

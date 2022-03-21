@@ -100,9 +100,9 @@ const PoViewBody = () => {
         </Dialog>
         <PoSearch/>
         <Divider/>
-        <Grow in>
-            {
-                isFetching ? <LoadingSpinner/> : <Paper elevation={6} style={{overflowY: "scroll"}}>
+        {
+            isFetching ? <LoadingSpinner/> : <Grow in>
+                <Paper elevation={6} style={{overflowY: "scroll"}}>
                     <Box>
                         <Stack spacing={0}>
                             <Stack direction="row"
@@ -226,8 +226,9 @@ const PoViewBody = () => {
                         </Stack>
                     </Box>
                 </Paper>
-            }
-        </Grow>
+            </Grow>
+        }
+
     </Stack>
 }
 

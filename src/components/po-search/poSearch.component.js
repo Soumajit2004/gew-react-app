@@ -3,31 +3,42 @@ import {Add, Search} from "@mui/icons-material";
 import React from "react";
 import {fetchPo, setAddMode, setSearchText} from "../../redux/po/po.actions.";
 import {selectPoSearch} from "../../redux/po/po.selectors.";
-import {connect} from "react-redux";
+import {connect, useDispatch, useSelector} from "react-redux";
+import Box from "@mui/material/Box";
 
-const PoSearch = ({searchText, setSearchText, setAddMode, fetchPo}) => {
+const PoSearch = () => {
+
+    const searchText = useSelector(selectPoSearch)
+    const dispatch = useDispatch()
+
+    const handleSearch = (event) => {
+        event.preventDefault()
+        const data = new FormData(event.target)
+        dispatch(setSearchText(data.get("search")))
+        dispatch(fetchPo())
+    }
+
     return <Fade in>
-        <Stack direction="row" spacing={2}>
-            <TextField
-                hiddenLabel
-                id="filled-hidden-label-normal"
-                placeholder="Search P.O"
-                value={searchText}
-                variant="filled"
-                fullWidth={true}
-                onChange={(e) => {
-                    setSearchText(e.target.value)
-                }}
-            />
-            <Button variant="contained" onClick={fetchPo}>
-                <Search/>
-            </Button>
-            <Button variant="contained" onClick={() => {
-                setAddMode(true)
-            }}>
-                <Add/>
-            </Button>
-        </Stack>
+        <Box component="form" onSubmit={handleSearch}>
+            <Stack direction="row" spacing={2}>
+                <TextField
+                    hiddenLabel
+                    placeholder="Search P.O"
+                    name="search"
+                    defaultValue={searchText}
+                    variant="filled"
+                    fullWidth={true}
+                />
+                <Button variant="contained" type="submit">
+                    <Search/>
+                </Button>
+                <Button variant="contained" onClick={() => {
+                    dispatch(setAddMode(true))
+                }}>
+                    <Add/>
+                </Button>
+            </Stack>
+        </Box>
     </Fade>
 }
 

@@ -41,10 +41,10 @@ if (process.env.NODE_ENV === 'development'){
     });
 }
 
-export const createUserWithPhone = httpsCallable(functions, 'createUserWithPhone')
-export const doxPoFirebaseFnc = httpsCallable(functions, 'docxPo')
-export const payUserFnc = httpsCallable(functions, 'payUsers')
-export const deleteUserFnc = httpsCallable(functions, 'deleteUser')
+export const createUserWithPhone = httpsCallable(functions, 'user-createUserWithPhone')
+export const doxPoFirebaseFnc = httpsCallable(functions, 'po-docxPo')
+export const payUserFnc = httpsCallable(functions, 'razorPay-payUsers')
+export const deleteUserFnc = httpsCallable(functions, 'user-deleteUser')
 
 
 

@@ -24,7 +24,6 @@ import {useDispatch} from "react-redux";
 
 const SignInForm = () => {
     const [isDialogOpen, setDialogOpen] = useState(false)
-    const [otp, setOTP] = useState("")
     const [isRecaptchaReady, setRecaptchaReady] = useState(false)
 
     const dispatch = useDispatch()
@@ -39,8 +38,11 @@ const SignInForm = () => {
         }
     }
 
-    const confirmOtp = () => {
+    const confirmOtp = (event) => {
         try {
+            const data = new FormData(event.currentTarget)
+            const otp = data.get("otp")
+
             window.otpVerifier.confirm(otp)
             setDialogOpen(false)
         } catch (e) {
@@ -80,29 +82,29 @@ const SignInForm = () => {
                        onClose={() => {
                            setDialogOpen(false)
                        }}>
-            <DialogTitle>Enter OTP</DialogTitle>
-            <DialogContent>
-                <DialogContentText>
-                    {`An OTP has been send to your registered phone no`}
-                </DialogContentText>
-                <TextField
-                    autoFocus
-                    margin="dense"
-                    id="otp"
-                    label="OTP"
-                    fullWidth
-                    variant="standard"
-                    onChange={(e) => {
-                        setOTP(e.target.value)
-                    }}
-                />
-            </DialogContent>
-            <DialogActions>
-                <Button onClick={() => {
-                    setDialogOpen(false)
-                }}>Cancel</Button>
-                <Button onClick={confirmOtp}>Login</Button>
-            </DialogActions>
+            <Box component="form" onSubmit={confirmOtp}>
+                <DialogTitle>Enter OTP</DialogTitle>
+                <DialogContent>
+                    <DialogContentText>
+                        {`An OTP has been send to your registered phone no`}
+                    </DialogContentText>
+                    <TextField
+                        autoFocus
+                        margin="dense"
+                        id="otp"
+                        label="OTP"
+                        name="otp"
+                        fullWidth
+                        variant="standard"
+                    />
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => {
+                        setDialogOpen(false)
+                    }}>Cancel</Button>
+                    <Button type="submit">Login</Button>
+                </DialogActions>
+            </Box>
         </Dialog>
     }
 

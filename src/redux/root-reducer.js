@@ -5,6 +5,7 @@ import poReducer from "./po/po.reducer";
 import storage from "redux-persist/lib/storage";
 import snackbarReducer from "./snackbar/snackbar.reducer";
 import recentPoReducer from "./recentPo/recentPo.reducer";
+import payoutReducer from "./payout/payout.reducer";
 
 const persistConfig = {
     key:"root",
@@ -16,7 +17,8 @@ const rootReducer = combineReducers({
     user:userReducer,
     po:poReducer,
     snackbar:snackbarReducer,
-    recentPo:recentPoReducer
+    recentPo:recentPoReducer,
+    payout: payoutReducer
 })
 
 export default persistReducer(persistConfig, rootReducer);

@@ -7,7 +7,7 @@ import {
     DialogActions,
     DialogContent,
     DialogContentText,
-    DialogTitle, Divider, InputAdornment, Stack,
+    DialogTitle, Divider, InputAdornment, Paper, Stack,
     TextField
 } from "@mui/material";
 import {DataGrid} from "@mui/x-data-grid";
@@ -115,14 +115,17 @@ const UserManagementPage = () => {
             <Stack marginTop={0.5} spacing={2} style={{height: "90vh"}} divider={<Divider/>}>
                 <Typography variant="h5">Employee Manager</Typography>
                 {
-                    !isFetching ? <DataGrid
-                        rows={userRows}
-                        columns={columns}
-                        onCellDoubleClick={(element) => {
-                            setSelectedElement(element)
-                            setDialogOpen(true)
-                        }}
-                    /> : <IsLoadingSpinner/>
+                    !isFetching ?
+                        <Paper elevation={6} style={{height:"100%"}}>
+                            <DataGrid
+                                rows={userRows}
+                                columns={columns}
+                                onCellDoubleClick={(element) => {
+                                    setSelectedElement(element)
+                                    setDialogOpen(true)
+                                }}
+                            />
+                        </Paper> : <IsLoadingSpinner/>
                 }
             </Stack>
         </Container>

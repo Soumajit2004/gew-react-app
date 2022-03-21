@@ -1,0 +1,9 @@
+const PayoutActionTypes = {
+    SET_SELECTED_ROWS: "SET_SELECTED_ROWS",
+
+    PAY_USERS_START:"PAY_USERS_START",
+    PAY_USERS_SUCCESS:"PAY_USERS_SUCCESS",
+    PAY_USERS_FAILURE:"PAY_USERS_FAILURE"
+}
+
+export default PayoutActionTypes

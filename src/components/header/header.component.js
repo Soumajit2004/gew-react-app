@@ -118,11 +118,14 @@ const HeaderComponent = ({title, children, history, currentUser}) => {
                         >
                             <MenuIcon/>
                         </IconButton>
-                        <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
+                        <Typography variant="h6" noWrap component="div" sx={{flexGrow: 1}}>
                             {title}
                         </Typography>
                         <Stack direction="row" spacing={2}>
-                            <Button variant="contained" color="secondary" startIcon={<AccountCircle/>}>
+                            <Button variant="contained" color="secondary" startIcon={<AccountCircle/>}
+                                    onClick={() => {
+                                        redirectTo("/profile")
+                                    }}>
                                 {currentUser.name}
                             </Button>
                             <Button variant="contained" color="error" startIcon={<Logout/>} onClick={signOut}>

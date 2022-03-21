@@ -12,15 +12,15 @@ import {store, persistor} from "./redux/store"
 
 const theme = createTheme({
     palette: {
-        type: "light",
+        type: 'light',
         primary: {
-            main: '#311b92',
+            main: '#064789',
         },
         secondary: {
-            main: '#80deea',
+            main: '#A5BE00',
         },
-        success: {
-            main: '#4caf50',
+        background: {
+            default: '#EBF2FA',
         },
     },
     typography: {
