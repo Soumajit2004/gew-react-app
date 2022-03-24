@@ -21,7 +21,7 @@ import {
     Dashboard, Group,
     Logout,
     Pages,
-    Payment,
+    Payment, Storage,
 } from "@mui/icons-material";
 import {withRouter} from "react-router";
 import {auth} from "../../firebase/firebase.utils";
@@ -186,6 +186,14 @@ const HeaderComponent = ({title, children, history, currentUser}) => {
                                 <ListItemText primary="Employee"/>
                             </ListItem>
                         </OnOwner>
+                        <ListItem button key={4} onClick={() => {
+                            redirectTo("/storage")
+                        }}>
+                            <ListItemIcon>
+                                <Storage/>
+                            </ListItemIcon>
+                            <ListItemText primary="Storage"/>
+                        </ListItem>
                     </List>
                     <Divider/>
                     <List>

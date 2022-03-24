@@ -1,10 +1,8 @@
-import React, {useEffect, useState} from "react";
+import React, {useState} from "react";
 import {CurrencyRupee, RefreshOutlined} from "@mui/icons-material";
 import {useDispatch, useSelector} from "react-redux";
-import {selectIsUsersFetching, selectUsersRows} from "../redux/user/user.selector";
-import {showMessage} from "../redux/snackbar/snackbar.actions";
+import {selectUsersRows} from "../redux/user/user.selector";
 import {fetchUsers} from "../redux/user/user.actions";
-import {payUserFnc} from "../firebase/firebase.utils";
 import {
     Button,
     CircularProgress, Container,
@@ -12,12 +10,10 @@ import {
     DialogActions,
     DialogContent,
     DialogContentText,
-    DialogTitle, Fade, InputAdornment, Paper,
+    DialogTitle, Fade, InputAdornment,
     Stack, TextField, Typography
 } from "@mui/material";
-import LoadingSpinner from "./withSpinner/isLoadingSpinner";
 import Divider from "@mui/material/Divider";
-import {DataGrid} from "@mui/x-data-grid";
 import {payUsers} from "../redux/payout/payout.actions";
 import PayoutTable from "./payout-table/payoutTable.component";
 import {selectIsPaying, selectSelectedPayouts} from "../redux/payout/payout.selectors";

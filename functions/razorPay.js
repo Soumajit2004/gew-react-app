@@ -4,9 +4,20 @@ const admin = require("firebase-admin");
 
 const db = admin.firestore()
 
-const razorPayAuth = {
-    username: "rzp_test_aK2KAFwspim1Ha",
-    password: "9glQAcfPqMUKVE3wtfZpfKdD"
+let razorPayAuth = {}
+let accNo = ""
+if (process.env.NODE_ENV === 'development') {
+     razorPayAuth = {
+        username: "rzp_test_aK2KAFwspim1Ha",
+        password: "9glQAcfPqMUKVE3wtfZpfKdD"
+    }
+    accNo = "2323230065575310"
+} else {
+    razorPayAuth = {
+        username: "rzp_live_Ux818qeSWDkBvF",
+        password: "gMXYttMmMMXo6Im8WakNCN7J"
+    }
+    accNo = "4564567618566110"
 }
 
 exports.payUsers = functions
@@ -24,7 +35,7 @@ exports.payUsers = functions
                     const data = r.data()
 
                     const configData = JSON.stringify({
-                        "account_number": "2323230065575310",
+                        "account_number": accNo,
                         "fund_account_id": data.razorpayFund,
                         "amount": (amount ? parseInt(amount) : parseInt(data.salary)) * 100,
                         "currency": "INR",
@@ -51,6 +62,7 @@ exports.payUsers = functions
                     return {status: "success", data: r.data}
                 })
                 .catch(e => {
+                    console.log(e.message)
                     return {status: "error"}
                 })
         }

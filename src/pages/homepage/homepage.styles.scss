@@ -1,6 +1,46 @@
-.home-page{
-  height: 100%;
+.center{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.welcome{
+  height: 90vh;
   background-image: url("../../assets/images/homepage-background.jpg");
   background-size: cover;
-  background-position: center;
+  background-position: bottom;
+}
+
+.contact{
+  background-image:url("../../assets/images/contact.jpg");
+  background-size: cover;
+  background-position: bottom;
+}
+
+.contact-form{
+  background-color: whitesmoke;
+  border: 5px solid #A5BE00;
+  border-radius: 5%;
+
+  transition: all 0.5s;
+
+  &:hover{
+    background-color: #A5BE00;
+
+    h3{
+      color: white;
+    }
+
+    input{
+      background-color: white;
+      border-radius: 5px 5px 0 0;
+    }
+
+    div{
+      div:nth-child(2){
+        background-color: white;
+        border-radius: 5px 5px 0 0;
+      }
+    }
+  }
 }

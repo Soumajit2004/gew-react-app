@@ -4,9 +4,17 @@ const axios = require("axios");
 
 const auth = admin.auth();
 
-const razorPayAuth = {
-    username: "rzp_test_aK2KAFwspim1Ha",
-    password: "9glQAcfPqMUKVE3wtfZpfKdD"
+let razorPayAuth = {}
+if (process.env.NODE_ENV === 'development') {
+    razorPayAuth = {
+        username: "rzp_test_aK2KAFwspim1Ha",
+        password: "9glQAcfPqMUKVE3wtfZpfKdD"
+    }
+} else {
+    razorPayAuth = {
+        username: "rzp_live_Ux818qeSWDkBvF",
+        password: "gMXYttMmMMXo6Im8WakNCN7J"
+    }
 }
 
 exports.createUserWithPhone = functions

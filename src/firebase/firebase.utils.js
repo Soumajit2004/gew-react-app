@@ -5,6 +5,7 @@ import {getAuth, browserSessionPersistence, setPersistence, connectAuthEmulator}
 import {getFirestore, connectFirestoreEmulator} from "firebase/firestore";
 import { getFunctions, httpsCallable, connectFunctionsEmulator} from 'firebase/functions';
 import { getStorage, connectStorageEmulator} from 'firebase/storage';
+import { getPerformance } from "firebase/performance";
 
 const firebaseConfig = {
     apiKey: "AIzaSyB-8K5SLVIWTiOQiJF1Sb4jLU4xDtKJ92c",
@@ -28,6 +29,7 @@ setPersistence(auth, browserSessionPersistence)
 export const db = getFirestore(app)
 export const storage = getStorage(app);
 const functions = getFunctions(app, "asia-south1")
+const performance = getPerformance(app)
 
 if (process.env.NODE_ENV === 'development'){
     connectAuthEmulator(auth, "http://localhost:9099")

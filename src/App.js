@@ -17,7 +17,8 @@ const PoPage = lazy(() => import("./pages/popage/popage.component"))
 const RegisterPage = lazy(() => import("./pages/registerpage/registerpage.component"))
 const PayoutPage = lazy(() => import("./pages/payoutpage/payoutpage.component"))
 const UserManagementPage = lazy(() => import("./pages/employeeMngPage/employeeManagementPage.component"))
-const UserProfilePage = lazy(()=> import("./pages/userProfilePage/userprofilePage.component"))
+const UserProfilePage = lazy(() => import("./pages/userProfilePage/userprofilePage.component"))
+const VaultPage = lazy(() => import("./pages/vaultPage/vaultPage.component"))
 
 const App = () => {
     const currentUser = useSelector(selectCurrentUser)
@@ -51,20 +52,24 @@ const App = () => {
                 <ErrorBoundary>
                     <Suspense fallback={<IsLoadingSpinner/>}>
                         <Route exact path="/" component={HomePage}/>
-                        <Route exact path="/sign-in"
+                        <Route path="/sign-in"
                                render={() => currentUser ? <Redirect to="/dashboard"/> : <SignInPage/>}/>
-                        <Route exact path="/dashboard"
+                        <Route path="/dashboard"
                                render={() => currentUser ? <DashboardPage/> : <Redirect to="/sign-in"/>}/>
-                        <Route exact path="/po-manager"
+                        <Route path="/po-manager"
                                render={() => currentUser ? (<PoPage/>) : (<Redirect to="/sign-in"/>)}/>
-                        <Route exact path="/register"
+                        <Route path="/register"
                                render={() => currentUser ? (<RegisterPage/>) : (<Redirect to="/sign-in"/>)}/>
-                        <Route exact path="/profile"
+                        <Route path="/profile"
                                render={() => currentUser ? (<UserProfilePage/>) : (<Redirect to="/sign-in"/>)}/>
-                        <Route exact path="/payouts"
+                        <Route path="/payouts"
                                render={() => (getUserRole() === "owner") ? (<PayoutPage/>) : (
                                    <Redirect to="/sign-in"/>)}/>
-                        <Route exact path="/employee"
+                        <Route path="/storage"
+                               render={() => (getUserRole() === "owner" || getUserRole() === "office") ? (
+                                   <VaultPage/>) : (
+                                   <Redirect to="/sign-in"/>)}/>
+                        <Route path="/employee"
                                render={() => (getUserRole() === "owner") ? (<UserManagementPage/>) : (
                                    <Redirect to="/sign-in"/>)}/>
                     </Suspense>
