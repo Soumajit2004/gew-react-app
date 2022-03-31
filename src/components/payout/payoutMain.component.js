@@ -1,5 +1,4 @@
 import React, {useState} from "react";
-import LoadingSpinner from "../withSpinner/isLoadingSpinner";
 import {
     Button, CircularProgress,
     Container,
@@ -15,10 +14,10 @@ import {useDispatch, useSelector} from "react-redux";
 import Divider from "@mui/material/Divider";
 import {RefreshOutlined} from "@mui/icons-material";
 import {fetchUsers} from "../../redux/user/user.actions";
-import {selectIsUsersFetching, selectUsersRows} from "../../redux/user/user.selector";
+import {selectUsersRows} from "../../redux/user/user.selector";
 import {payUsers} from "../../redux/payout/payout.actions";
 import {selectIsPaying, selectSelectedPayouts} from "../../redux/payout/payout.selectors";
-import PayoutTable from "../payout-table/payoutTable.component";
+import PayoutTable from "./payoutTable.component";
 
 
 const PayoutMain = () => {

@@ -5,7 +5,7 @@ import {useDispatch, useSelector} from "react-redux";
 import "./recentPo.styles.scss"
 import {parseDate} from "../../utilils/functions.utilis";
 import {withRouter} from "react-router";
-import {fetchPo, setSearchText} from "../../redux/po/po.actions.";
+import {fetchPo} from "../../redux/po/po.actions.";
 import {selectRecentPo, selectRecentPoAll} from "../../redux/recentPo/recentPo.selectors";
 import {fetchRecentPo, setRecentPoAll} from "../../redux/recentPo/recentPo.actions";
 import {ArrowRightAltOutlined} from "@mui/icons-material";
@@ -29,8 +29,7 @@ const RecentPo = ({history}) => {
                     <Grid key={e.id} item xs={12} lg={3} md={4}>
                         <Grow in>
                             <Card elevation={6} className="r-po-card" onClick={() => {
-                                dispatch(setSearchText(e.id))
-                                dispatch(fetchPo())
+                                dispatch(fetchPo(e.id))
                                 history.push("/po-manager")
                             }}>
                                 <CardContent>
@@ -47,14 +46,16 @@ const RecentPo = ({history}) => {
                 )
             }))
 
-            if (!isViewAll) {
+            if (!isViewAll || items.length >= 11) {
                 items.push(
                     <Grid key="all" item xs={12} lg={3} md={4}>
                         <Grow in>
-                            <Card elevation={6} className="r-po-card" onClick={() => {
-                                dispatch(setRecentPoAll(true))
-                                fetchRecentPoHandler()
-                            }}>
+                            <Card elevation={6}
+                                  className="r-po-card"
+                                  onClick={() => {
+                                      dispatch(setRecentPoAll(true))
+                                      fetchRecentPoHandler()
+                                  }}>
                                 <CardContent style={{
                                     height: "100%",
                                     display: "flex",
@@ -72,13 +73,11 @@ const RecentPo = ({history}) => {
             }
             return items
         } catch (e) {
-            return (
-                <Grid item xs={12} lg={3} md={6}>
-                    <Typography variant="h5" fontWeight={500} gutterBottom>
-                        Loading...
-                    </Typography>
-                </Grid>
-            )
+            return (<Grid item xs={12} lg={3} md={6}>
+                <Typography variant="h5" fontWeight={500} gutterBottom>
+                    Loading...
+                </Typography>
+            </Grid>)
 
         }
 

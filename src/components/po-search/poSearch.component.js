@@ -1,55 +1,74 @@
-import {Button, Fade, Stack, TextField} from "@mui/material";
+import {Autocomplete, Button, Fade, Stack, TextField} from "@mui/material";
 import {Add, Search} from "@mui/icons-material";
-import React from "react";
-import {fetchPo, setAddMode, setSearchText} from "../../redux/po/po.actions.";
-import {selectPoSearch} from "../../redux/po/po.selectors.";
-import {connect, useDispatch, useSelector} from "react-redux";
+import React, {useEffect, useState} from "react";
+import {fetchPo, findPo, setAddMode} from "../../redux/po/po.actions.";
+import {selectIsFinding, selectMatchingPO, selectPoSearch} from "../../redux/po/po.selectors.";
+import {useDispatch, useSelector} from "react-redux";
 import Box from "@mui/material/Box";
 
 const PoSearch = () => {
+    const [localSearchText, setLocalSearchText] = useState("")
 
     const searchText = useSelector(selectPoSearch)
+    const matchingPo = useSelector(selectMatchingPO)
+    const isFinding = useSelector(selectIsFinding)
     const dispatch = useDispatch()
 
+    useEffect(()=>{
+        dispatch(findPo({id:"",field:"poNumber"}))
+    }, [])
+
     const handleSearch = (event) => {
-        event.preventDefault()
-        const data = new FormData(event.target)
-        dispatch(setSearchText(data.get("search")))
-        dispatch(fetchPo())
+        const data = event.value
+        dispatch(findPo({id: data, field: "poNumber"}))
     }
 
     return <Fade in>
-        <Box component="form" onSubmit={handleSearch}>
             <Stack direction="row" spacing={2}>
-                <TextField
-                    hiddenLabel
-                    placeholder="Search P.O"
-                    name="search"
-                    defaultValue={searchText}
-                    variant="filled"
+                <Autocomplete
                     fullWidth={true}
+                    defaultValue={searchText}
+                    loading={isFinding}
+                    value={localSearchText}
+                    renderOption={(props, option, state) => {
+                        return <Button
+                            key={option}
+                            fullWidth
+                            onClick={() => {
+                                setLocalSearchText(option)
+                                dispatch(fetchPo(option))
+                            }}
+                            style={{justifyContent: "flex-start"}}
+                        >
+                            {option}
+                        </Button>
+                    }}
+                    renderInput={(params) => {
+                        return <TextField
+                            {...params}
+                            hiddenLabel
+                            placeholder="Search P.O"
+                            name="search"
+                            variant="outlined"
+                            onChange={(event) => {
+                                setLocalSearchText(event.target.value)
+                                handleSearch(event.target)
+                            }}
+                        />
+                    }}
+                    options={
+                        matchingPo.map((value) => {
+                            return value.poNumber
+                        })
+                    }
                 />
-                <Button variant="contained" type="submit">
-                    <Search/>
-                </Button>
                 <Button variant="contained" onClick={() => {
                     dispatch(setAddMode(true))
                 }}>
                     <Add/>
                 </Button>
             </Stack>
-        </Box>
     </Fade>
 }
 
-const mapStateToProps = (state) => ({
-    searchText: selectPoSearch(state),
-})
-
-const mapDispatchToProps = dispatch => ({
-    fetchPo: () => dispatch(fetchPo()),
-    setSearchText: text => dispatch(setSearchText(text)),
-    setAddMode: bool => dispatch(setAddMode(bool))
-})
-
-export default connect(mapStateToProps, mapDispatchToProps)(PoSearch)
+export default PoSearch

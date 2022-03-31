@@ -3,9 +3,9 @@ import React, {useEffect, useState} from "react";
 import {Tab} from "@mui/material";
 import Box from "@mui/material/Box";
 import {TabContext, TabList, TabPanel} from "@mui/lab";
-import PayoutMain from "../../components/payout-main/payoutMain.component";
+import PayoutMain from "../../components/payout/payoutMain.component";
 import PaymentHistory from "../../components/payment-history/paymentHistory.component";
-import CustomPayout from "../../components/custom-payment.component";
+import CustomPayout from "../../components/payout/custom-payment.component";
 import {useDispatch} from "react-redux";
 import {fetchUsers} from "../../redux/user/user.actions";
 

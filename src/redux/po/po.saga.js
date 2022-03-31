@@ -5,21 +5,22 @@ import {
     deletePoFinish,
     downloadPoFinish,
     fetchPoFailure,
-    fetchPoSuccess,
+    fetchPoSuccess, findPoFailure, findPoSuccess,
     savePoFailure,
     savePoSuccess
 } from "./po.actions.";
 import {PoActionTypes} from "./po.types";
 import {deleteDoc, doc, setDoc, Timestamp, updateDoc} from "firebase/firestore";
-import {selectPoAdd, selectPoData, selectPoEdit, selectPoSearch} from "./po.selectors.";
+import {selectPoAdd, selectPoData, selectPoEdit} from "./po.selectors.";
 import {selectCurrentUser} from "../user/user.selector";
 import {getDownloadURL, ref} from "firebase/storage";
 import {downloadFromUrl} from "../../utilils/functions.utilis";
 import {customGetPoDoc} from "../../firebase/firebase.functions";
+import {poIndex} from "../../algolia/algolia.utility";
 
-export function* fetchPoAsync() {
+export function* fetchPoAsync({payload}) {
     try {
-        const response = yield customGetPoDoc(yield select(selectPoSearch))
+        const response = yield customGetPoDoc(payload)
         const data = yield response.data()
         if (data) {
             yield put(fetchPoSuccess({
@@ -56,6 +57,7 @@ export function* savePoAsync({
         if (yield select(selectPoAdd)) {
 
             yield setDoc(docRef, {
+                poNumber:poNumber,
                 issueNo: issueNumber,
                 issueDate: Timestamp.fromDate(issueDate),
                 poDate: Timestamp.fromDate(poDate),
@@ -134,4 +136,24 @@ export function* deletePoAsync() {
 
 export function* deletePoStart() {
     yield takeEvery(PoActionTypes.DELETE_PO_START, deletePoAsync)
+}
+
+// Find PO
+
+export function* findPoAsync({id, field}) {
+    try{
+        const result = yield poIndex.search(id.toString())
+        const hits = result.hits
+
+        yield put(findPoSuccess(hits))
+    }catch (e) {
+        yield put(showMessage(e.message, "error"))
+        yield put(findPoFailure())
+    }
+
+
+}
+
+export function* findPoStart() {
+    yield takeEvery(PoActionTypes.FIND_PO_START, findPoAsync)
 }

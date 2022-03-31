@@ -2,20 +2,34 @@ import {PoActionTypes} from "./po.types";
 
 
 const INITIAL_STATE = {
+    matchingPo:[],
     poData : {},
     searchText:"",
     viewMode:false,
     editMode:false,
     addMode:false,
     isFetching:false,
+    isFinding: false
 }
 
 const poReducer = (state = INITIAL_STATE, action) => {
     switch (action.type) {
-        case PoActionTypes.SET_SEARCH_TEXT:
+        case PoActionTypes.FIND_PO_START:
             return {
                 ...state,
-                searchText: action.payload,
+                isFinding: true,
+            }
+        case PoActionTypes.FIND_PO_SUCCESS:
+            return {
+                ...state,
+                isFinding: false,
+                matchingPo: action.payload
+            }
+        case PoActionTypes.FIND_PO_FAILURE:
+            return {
+                ...state,
+                isFinding: false,
+                matchingPo: []
             }
         case PoActionTypes.SET_ADD_MODE:
             return {
@@ -37,6 +51,7 @@ const poReducer = (state = INITIAL_STATE, action) => {
             return {
                 ...state,
                 isFetching: true,
+                searchText: action.payload
             }
         case PoActionTypes.FETCH_PO_SUCCESS:
             return {

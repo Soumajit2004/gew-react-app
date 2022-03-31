@@ -98,6 +98,7 @@ const PoViewBody = () => {
                 </Button>
             </DialogActions>
         </Dialog>
+
         <PoSearch/>
         <Divider/>
         {

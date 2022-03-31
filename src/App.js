@@ -65,10 +65,6 @@ const App = () => {
                         <Route path="/payouts"
                                render={() => (getUserRole() === "owner") ? (<PayoutPage/>) : (
                                    <Redirect to="/sign-in"/>)}/>
-                        <Route path="/storage"
-                               render={() => (getUserRole() === "owner" || getUserRole() === "office") ? (
-                                   <VaultPage/>) : (
-                                   <Redirect to="/sign-in"/>)}/>
                         <Route path="/employee"
                                render={() => (getUserRole() === "owner") ? (<UserManagementPage/>) : (
                                    <Redirect to="/sign-in"/>)}/>

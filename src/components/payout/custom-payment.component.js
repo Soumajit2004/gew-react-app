@@ -1,8 +1,8 @@
 import React, {useState} from "react";
 import {CurrencyRupee, RefreshOutlined} from "@mui/icons-material";
 import {useDispatch, useSelector} from "react-redux";
-import {selectUsersRows} from "../redux/user/user.selector";
-import {fetchUsers} from "../redux/user/user.actions";
+import {selectUsersRows} from "../../redux/user/user.selector";
+import {fetchUsers} from "../../redux/user/user.actions";
 import {
     Button,
     CircularProgress, Container,
@@ -14,9 +14,9 @@ import {
     Stack, TextField, Typography
 } from "@mui/material";
 import Divider from "@mui/material/Divider";
-import {payUsers} from "../redux/payout/payout.actions";
-import PayoutTable from "./payout-table/payoutTable.component";
-import {selectIsPaying, selectSelectedPayouts} from "../redux/payout/payout.selectors";
+import {payUsers} from "../../redux/payout/payout.actions";
+import PayoutTable from "./payoutTable.component";
+import {selectIsPaying, selectSelectedPayouts} from "../../redux/payout/payout.selectors";
 
 const CustomPayout = () => {
     const [amount, setAmount] = useState(0)

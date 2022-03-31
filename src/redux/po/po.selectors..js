@@ -7,6 +7,16 @@ export const selectPoData = createSelector(
     po => po.poData
 )
 
+export const selectMatchingPO = createSelector(
+    [selectPo],
+    po => po.matchingPo
+)
+
+export const selectIsFinding = createSelector(
+    [selectPo],
+    po => po.isFinding
+)
+
 export const selectPoSearch = createSelector(
     [selectPo],
     po => po.searchText

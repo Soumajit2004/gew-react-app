@@ -7,13 +7,13 @@ import {
     Typography
 } from "@mui/material";
 import RazorpayButton from "../../components/razorpay-button/razorpayButton.component";
-import VisitorHeader from "../../components/appbarVisitor/appbarVsitor.component";
 import Box from "@mui/material/Box";
 import {MapContainer} from "../../components/mapBox/map.component";
+import Footer from "../../components/footer/footer.component";
 
 const HomePage = () => {
 
-    return <VisitorHeader>
+    return <Stack>
         <Box className={"welcome"}>
             <Container
                 style={{
@@ -44,7 +44,7 @@ const HomePage = () => {
                                 Get in touch
                             </Typography>
                         </Grid>
-                        <Grid item sm={0} md={6} xs={0}>
+                        <Grid item sm={12} md={6} xs={12} style={{minHeight:"50vh"}}>
                             <MapContainer/>
                         </Grid>
                         <Grid item sm={12} md={6} xs={12}>
@@ -69,10 +69,8 @@ const HomePage = () => {
                 </Box>
             </Container>
         </Box>
-        <Container>
-
-        </Container>
-    </VisitorHeader>
+        <Footer/>
+    </Stack>
 }
 
 export default HomePage

@@ -1,10 +1,34 @@
 import {PoActionTypes} from "./po.types";
 
+// Find Po
+
+export const findPo = ({id, field}) => {
+    return {
+        type: PoActionTypes.FIND_PO_START,
+        id: id,
+        field: field
+    }
+}
+
+export const findPoSuccess = (matchingPo) => {
+    return {
+        type: PoActionTypes.FIND_PO_SUCCESS,
+        payload: matchingPo
+    }
+}
+
+export const findPoFailure = () => {
+    return {
+        type: PoActionTypes.FIND_PO_FAILURE
+    }
+}
+
 // Fetch PO
 
-export const fetchPo = () => {
+export const fetchPo = (id) => {
     return {
         type: PoActionTypes.FETCH_PO_START,
+        payload: id
     }
 }
 
@@ -31,7 +55,7 @@ export const fetchPoFailure = () => {
 export const savePo = (data) => {
     return {
         type: PoActionTypes.SAVE_PO_START,
-        payload:data
+        payload: data
     }
 }
 
@@ -82,13 +106,6 @@ export const deletePoFinish = () => {
 }
 
 // Others
-
-export const setSearchText = (text) => {
-    return {
-        type: PoActionTypes.SET_SEARCH_TEXT,
-        payload: text.toString()
-    }
-}
 
 export const setAddMode = (bool) => {
     return {
