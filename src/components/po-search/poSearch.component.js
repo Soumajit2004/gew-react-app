@@ -1,10 +1,9 @@
 import {Autocomplete, Button, Fade, Stack, TextField} from "@mui/material";
-import {Add, Search} from "@mui/icons-material";
+import {Add} from "@mui/icons-material";
 import React, {useEffect, useState} from "react";
 import {fetchPo, findPo, setAddMode} from "../../redux/po/po.actions.";
 import {selectIsFinding, selectMatchingPO, selectPoSearch} from "../../redux/po/po.selectors.";
 import {useDispatch, useSelector} from "react-redux";
-import Box from "@mui/material/Box";
 
 const PoSearch = () => {
     const [localSearchText, setLocalSearchText] = useState("")
@@ -16,7 +15,7 @@ const PoSearch = () => {
 
     useEffect(()=>{
         dispatch(findPo({id:"",field:"poNumber"}))
-    }, [])
+    }, [dispatch])
 
     const handleSearch = (event) => {
         const data = event.value

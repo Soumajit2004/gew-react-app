@@ -22,3 +22,7 @@ export const downloadFromUrl = (url) => {
     link.click()
     document.getElementById("root").removeChild(link)
 }
+
+export const dateToUnix = (date) => {
+    return Math.floor(date.getTime() / 1000)
+}

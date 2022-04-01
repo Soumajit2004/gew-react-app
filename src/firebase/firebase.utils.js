@@ -30,6 +30,7 @@ export const db = getFirestore(app)
 export const storage = getStorage(app);
 const functions = getFunctions(app, "asia-south1")
 const performance = getPerformance(app)
+console.log(performance.dataCollectionEnabled)
 
 if (process.env.NODE_ENV === 'development'){
     connectAuthEmulator(auth, "http://localhost:9099")
@@ -47,6 +48,7 @@ export const createUserWithPhone = httpsCallable(functions, 'user-createUserWith
 export const doxPoFirebaseFnc = httpsCallable(functions, 'po-docxPo')
 export const payUserFnc = httpsCallable(functions, 'razorPay-payUsers')
 export const deleteUserFnc = httpsCallable(functions, 'user-deleteUser')
+
 
 
 

@@ -8,7 +8,6 @@ import {
 } from "@mui/material";
 import RazorpayButton from "../../components/razorpay-button/razorpayButton.component";
 import Box from "@mui/material/Box";
-import {MapContainer} from "../../components/mapBox/map.component";
 import Footer from "../../components/footer/footer.component";
 
 const HomePage = () => {
@@ -45,7 +44,11 @@ const HomePage = () => {
                             </Typography>
                         </Grid>
                         <Grid item sm={12} md={6} xs={12} style={{minHeight:"50vh"}}>
-                            <MapContainer/>
+                            <iframe
+                                title={"Map"}
+                                id={"mapBox"}
+                                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d459.66060773917!2d88.1698592054715!3d22.82894810803874!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x876b686319db9cdc!2sGhosh%20Electrical%20Work!5e0!3m2!1sen!2sin!4v1648136825300!5m2!1sen!2sin"
+                                width="100%" height={"100%"}/>
                         </Grid>
                         <Grid item sm={12} md={6} xs={12}>
                             <Box component={"form"} action={"https://formspree.io/f/mzboapzl"} method={"POST"} className={"contact-form"}>

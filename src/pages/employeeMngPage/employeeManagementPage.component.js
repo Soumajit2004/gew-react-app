@@ -41,8 +41,10 @@ const UserManagementPage = () => {
     const showMessageHandler = (msg, mode) => dispatch(showMessage(msg, mode))
     const fetchUsersHandler = () => dispatch(fetchUsers())
 
+
     useEffect(() => {
         fetchUsersHandler()
+        // eslint-disable-next-line
     }, [dispatch])
 
     const EditDisplayDialog = ({element}) => {

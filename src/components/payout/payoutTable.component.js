@@ -13,7 +13,9 @@ const PayoutTable = () => {
         {field: 'name', headerName: 'Name', width: 250},
         {field: 'bankAccountNumber', headerName: 'Account No', width: 250},
         {field: 'salary', headerName: 'Salary', width: 150},
-        {field: 'lastPayedDate', headerName: 'Last Payed On', width: 400},
+        {
+            field: 'lastPayedDate', headerName: 'Last Payed On', width: 400, type: "date",
+        }
     ];
 
     const userRows = useSelector(selectUsersRows)

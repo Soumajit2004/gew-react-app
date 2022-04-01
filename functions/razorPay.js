@@ -1,13 +1,12 @@
 const functions = require("firebase-functions");
 const axios = require("axios");
 const admin = require("firebase-admin");
-
 const db = admin.firestore()
 
 let razorPayAuth = {}
 let accNo = ""
 if (process.env.NODE_ENV === 'development') {
-     razorPayAuth = {
+    razorPayAuth = {
         username: "rzp_test_aK2KAFwspim1Ha",
         password: "9glQAcfPqMUKVE3wtfZpfKdD"
     }

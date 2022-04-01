@@ -18,7 +18,6 @@ const RegisterPage = lazy(() => import("./pages/registerpage/registerpage.compon
 const PayoutPage = lazy(() => import("./pages/payoutpage/payoutpage.component"))
 const UserManagementPage = lazy(() => import("./pages/employeeMngPage/employeeManagementPage.component"))
 const UserProfilePage = lazy(() => import("./pages/userProfilePage/userprofilePage.component"))
-const VaultPage = lazy(() => import("./pages/vaultPage/vaultPage.component"))
 
 const App = () => {
     const currentUser = useSelector(selectCurrentUser)

@@ -17,8 +17,10 @@ const RecentPo = ({history}) => {
     const dispatch = useDispatch()
     const fetchRecentPoHandler = () => dispatch(fetchRecentPo())
 
+
     useEffect(() => {
         fetchRecentPoHandler()
+        // eslint-disable-next-line
     }, [dispatch])
 
     const getItems = () => {

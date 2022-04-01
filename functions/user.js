@@ -1,6 +1,7 @@
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
 const axios = require("axios");
+const db = admin.firestore()
 
 const auth = admin.auth();
 
@@ -47,8 +48,7 @@ exports.deleteUser = functions
     .region("asia-south1")
     .https.onCall((d, context) => {
         const {id, razorpayContact, razorpayFund} = d
-        console.log(d)
-        if (context.auth) {
+
             const configData = {
                 "active": false
             }
@@ -63,11 +63,12 @@ exports.deleteUser = functions
                 .then((r) => {
                     return axios.patch(`https://api.razorpay.com/v1/fund_accounts/${razorpayFund}`, configData, config)
                 })
-                .catch((e)=>{
-                    console.log(e.message)
-                })
                 .then((r) => {
                     return auth.deleteUser(id)
+                })
+                .catch((e)=>{
+                    console.log(e.message)
+                    return db.collection('users').doc(id).delete()
                 })
                 .then((r) => {
                     return db.collection('users').doc(id).delete()
@@ -78,5 +79,4 @@ exports.deleteUser = functions
                 .catch(e => {
                     return {status: e.message}
                 })
-        }
     })
