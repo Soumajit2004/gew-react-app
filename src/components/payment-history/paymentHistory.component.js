@@ -28,6 +28,8 @@ const PaymentHistory = () => {
 
     ];
     const today = parseDate({date: new Date(), reverse: true})
+    const tomorrow = parseDate({date: new Date(Date.now() + 24 * 60 * 60 * 1000), reverse: true})
+    console.log(tomorrow)
 
     const rows = useSelector(selectPaymentHistory)
     const isFetching = useSelector(selectIsPaymentHistoryFetching)
@@ -71,7 +73,7 @@ const PaymentHistory = () => {
                                defaultValue={today}/>
                     <Typography color={"primary"} variant={"h4"}>{" - "}</Typography>
                     <TextField label="To" name={"end"} variant="outlined" type={"date"} size={"small"}
-                               defaultValue={today}/>
+                               defaultValue={tomorrow}/>
                     <Button type={"submit"} startIcon={<Search/>} variant={"contained"} style={{height: "40px"}}>
                         Search
                     </Button>
